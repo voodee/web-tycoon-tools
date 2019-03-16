@@ -11,8 +11,8 @@ module.exports = async (browser, logger) => {
         } catch (e) {
           logger.error("Ошибка при удаление спамных ссылок", e);
         }
-        // каждую минуту
-        await new Promise(res => setTimeout(res, 60 * 1000));
+        // каждые 10 сек
+        await new Promise(res => setTimeout(res, 10 * 1000));
       }
     })(),
     (async () => {
