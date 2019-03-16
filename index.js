@@ -11,15 +11,12 @@ let lastResult = ["..."];
 (async () => {
   try {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
     const page = await browser.newPage();
     await page.goto("https://game.web-tycoon.com/#login", {
       waitUntil: "networkidle2"
-    });
-    await page.addScriptTag({
-      url: "https://code.jquery.com/jquery-3.3.1.min.js"
     });
 
     // Login
@@ -29,7 +26,12 @@ let lastResult = ["..."];
     await page.waitForNavigation();
 
     while (true) {
+      await page.addScriptTag({
+        url: "https://code.jquery.com/jquery-3.3.1.min.js"
+      });
+      await new Promise(res => setTimeout(res, 2000));
       lastResult = await page.evaluate(evaluate);
+      await page.reload();
       console.log(lastResult);
       await new Promise(res => setTimeout(res, 10000));
     }
