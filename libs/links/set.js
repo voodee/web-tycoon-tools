@@ -11,6 +11,7 @@ module.exports = async (browser, logger) => {
 
   const token = await page.evaluate(() => localStorage.token);
   const userId = await page.evaluate(() => localStorage.userId);
+  await page.close();
 
   // получаем сайты пользователя
   const {
@@ -67,5 +68,4 @@ module.exports = async (browser, logger) => {
     await new Promise(res => setTimeout(res, 2000));
   }
   logger.log("Спам закончился");
-  await page.close();
 };

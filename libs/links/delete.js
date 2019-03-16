@@ -9,6 +9,8 @@ module.exports = async (browser, logger) => {
   const token = await page.evaluate(() => localStorage.token);
   const userId = await page.evaluate(() => localStorage.userId);
 
+  await page.close();
+
   // получаем сайты пользователя
   const {
     data: { sites: userSites }
@@ -32,6 +34,4 @@ module.exports = async (browser, logger) => {
       );
     }
   }
-
-  await page.close();
 };
