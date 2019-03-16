@@ -2,7 +2,9 @@ const puppeteer = require("puppeteer");
 const express = require("express");
 require("dotenv").config();
 
-const evaluate = require("./evaluate");
+const auth = require("./helpers/auth");
+const tasks = require("./libs/tasks");
+const links = require("./libs/links");
 
 const app = express();
 
@@ -11,30 +13,13 @@ let lastResult = ["..."];
 (async () => {
   try {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
-    const page = await browser.newPage();
-    await page.goto("https://game.web-tycoon.com/#login", {
-      waitUntil: "networkidle2"
-    });
 
-    // Login
-    await page.type("#userEmail", process.env.login);
-    await page.type("#userPassword", process.env.password);
-    await page.click(".enterButton");
-    await page.waitForNavigation();
+    await auth(browser);
 
-    while (true) {
-      await page.addScriptTag({
-        url: "https://code.jquery.com/jquery-3.3.1.min.js"
-      });
-      await new Promise(res => setTimeout(res, 2000));
-      lastResult = await page.evaluate(evaluate);
-      await page.reload();
-      console.log(lastResult);
-      await new Promise(res => setTimeout(res, 10000));
-    }
+    await Promise.all([tasks(browser, console), links(browser, console)]);
 
     await browser.close();
   } catch (e) {
