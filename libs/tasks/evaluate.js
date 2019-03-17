@@ -49,7 +49,9 @@ module.exports = async () => {
         // если это нужный скилл
         skillMain === skill &&
         // если у него энергии больше 5%
-        $card.find(".energy").width() / $card.find(".energyBar").width() > 0.05
+        ($card.find(".extraEnergy").length > 0 ||
+          $card.find(".energy").width() / $card.find(".energyBar").width() >
+            0.05)
       ) {
         cardsFiltered.push($card);
       }
