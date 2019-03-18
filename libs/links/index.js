@@ -14,18 +14,18 @@ module.exports = async (browser, logger) => {
         // каждые 10 сек
         await new Promise(res => setTimeout(res, 10 * 1000));
       }
-    })(),
-    (async () => {
-      while (1) {
-        // ставим спамные ссылки
-        try {
-          await setAction(browser, logger);
-        } catch (e) {
-          logger.error("Ошибка при установки спамных ссылок", e);
-        }
-        // каждые 15 минут
-        await new Promise(res => setTimeout(res, 15 * 60 * 1000));
-      }
     })()
+    // (async () => {
+    //   while (1) {
+    //     // ставим спамные ссылки
+    //     try {
+    //       await setAction(browser, logger);
+    //     } catch (e) {
+    //       logger.error("Ошибка при установки спамных ссылок", e);
+    //     }
+    //     // каждые 15 минут
+    //     await new Promise(res => setTimeout(res, 15 * 60 * 1000));
+    //   }
+    // })()
   ]);
 };
