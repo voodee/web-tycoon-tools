@@ -20,7 +20,6 @@ module.exports = async (browser, logger) => {
 
   for (let i = 0; i < userSites.length; ++i) {
     const site = userSites[i];
-
     try {
       const { data } = await axios.delete(
         `https://game.web-tycoon.com/api/links/${userId}/${

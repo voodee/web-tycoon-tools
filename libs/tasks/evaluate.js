@@ -69,7 +69,7 @@ module.exports = async () => {
   const go = async () => {
     // переходим на страницу с сайтами
     $(".linkSites .title").click();
-    await new Promise(res => setTimeout(res, TIMEOUT));
+    await new Promise(res => setTimeout(res, 3000));
     logger.log("перешли на страницу сайтов");
     // считаем кол-во времени
     const siteCount = $(".siteCard").length;
@@ -83,6 +83,33 @@ module.exports = async () => {
         .eq(i)
         .click();
       await new Promise(res => setTimeout(res, TIMEOUT));
+
+      // проверяем лимиты хостинга
+      let hostingLimit = parseFloat(
+        $(".hostingLimit")
+          .text()
+          .replace(",", ".")
+      );
+      if (
+        $(".hostingLimit")
+          .text()
+          .includes("тыс")
+      ) {
+        hostingLimit *= 1000;
+      }
+      let trafSpeed = parseFloat(
+        $(".trafSpeed")
+          .text()
+          .replace(",", ".")
+      );
+      if (
+        $(".trafSpeed")
+          .text()
+          .includes("тыс")
+      ) {
+        trafSpeed *= 1000;
+      }
+      const diffTraf = trafSpeed / hostingLimit;
 
       // проходим по таскам
       const $tasks = $(".taskItem:not(.marketing)");
@@ -99,7 +126,13 @@ module.exports = async () => {
         if (widthProgressBar === widthVersionProgress) {
           $el.find(".cancelTask").click();
         } else {
-          await findWorker($el);
+          // если лимит хостинга позволяет
+          if (diffTraf < 0.95) {
+            // то ставим работника
+            await findWorker($el);
+          } else {
+            logger.log(`На сайте ${i} лимит хостинга слишком велик`);
+          }
         }
         await new Promise(res => setTimeout(res, TIMEOUT));
       }
@@ -138,7 +171,7 @@ module.exports = async () => {
 
     // переходим на страницу с работниками
     $(".linkWorkers .title").click();
-    await new Promise(res => setTimeout(res, TIMEOUT));
+    await new Promise(res => setTimeout(res, 3000));
     logger.log("перешли на страницу с работниками");
 
     await (async () => {
