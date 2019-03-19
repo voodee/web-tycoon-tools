@@ -168,51 +168,6 @@ module.exports = async () => {
         await findWorker($el);
       }
     }
-
-    // переходим на страницу с работниками
-    $(".linkWorkers .title").click();
-    await new Promise(res => setTimeout(res, 3000));
-    logger.log("перешли на страницу с работниками");
-
-    await (async () => {
-      const $cards = $(".cardContainer");
-      const cardsFiltered = [];
-      for (let cardNumber = 0; cardNumber < $cards.length; ++cardNumber) {
-        const $card = $cards.eq(cardNumber);
-        logger.log(`проверяем работника ${cardNumber}`);
-        if (
-          // если работник не работает
-          $card.find(".workingStatus").length === 0 &&
-          // и у него энергии меньше 5%
-          $card.find(".energy").width() / $card.find(".energyBar").width() <
-            0.05
-        ) {
-          logger.log(`открываем работника ${cardNumber}`);
-          $card.click();
-          await new Promise(res => setTimeout(res, TIMEOUT));
-
-          $buttons = $(".infoBlock footer button");
-          for (
-            let buttonNumber = 0;
-            buttonNumber < $buttons.length;
-            ++buttonNumber
-          ) {
-            $button = $buttons.eq(buttonNumber);
-            if (
-              $button.text().trim() === "Отправить отдохнуть" ||
-              $button.text().trim() === "Отдохнуть"
-            ) {
-              logger.log("отправляем работника отдохнуть");
-              $button.click();
-            }
-          }
-          await new Promise(res => setTimeout(res, TIMEOUT / 10));
-
-          $(".linkWorkers .title").click();
-          await new Promise(res => setTimeout(res, TIMEOUT));
-        }
-      }
-    })();
   };
 
   const time = Date.now();

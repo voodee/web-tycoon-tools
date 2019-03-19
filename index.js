@@ -6,6 +6,7 @@ const auth = require("./helpers/auth");
 const tasks = require("./libs/tasks");
 const links = require("./libs/links");
 const adv = require("./libs/adv");
+const workers = require("./libs/workers");
 
 const app = express();
 
@@ -23,7 +24,8 @@ let lastResult = ["..."];
     await Promise.all([
       tasks(browser, console),
       links(browser, console),
-      adv(browser, console)
+      adv(browser, console),
+      workers(browser, console)
     ]);
 
     await browser.close();
