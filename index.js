@@ -5,6 +5,7 @@ require("dotenv").config();
 const auth = require("./helpers/auth");
 const tasks = require("./libs/tasks");
 const links = require("./libs/links");
+const adv = require("./libs/adv");
 
 const app = express();
 
@@ -19,7 +20,11 @@ let lastResult = ["..."];
 
     await auth(browser);
 
-    await Promise.all([tasks(browser, console), links(browser, console)]);
+    await Promise.all([
+      tasks(browser, console),
+      links(browser, console),
+      adv(browser, console)
+    ]);
 
     await browser.close();
   } catch (e) {

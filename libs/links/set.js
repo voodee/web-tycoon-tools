@@ -22,7 +22,7 @@ module.exports = async (browser, logger) => {
 
   // получаем все сайты
   let sites = [];
-  for (let epochId = 0; epochId <= 2; ++epochId) {
+  for (let epochId = 0; epochId <= 5; ++epochId) {
     for (let i = 1; i <= 11; ++i) {
       try {
         const {
@@ -42,6 +42,8 @@ module.exports = async (browser, logger) => {
   sites = sites.filter(({ sitethemeId }) => siteTemes.includes(sitethemeId));
   // спам доступен только после 9 уровня
   sites = sites.filter(({ selfLevel }) => +selfLevel > 8);
+  // случайно мешаем
+  sites = sites.sort(() => Math.random() - 0.5);
 
   for (let i = 0; i < sites.length; ++i) {
     const site = sites[i];
@@ -65,7 +67,7 @@ module.exports = async (browser, logger) => {
         e.response.data.error
       );
     }
-    await new Promise(res => setTimeout(res, 2000));
+    await new Promise(res => setTimeout(res, 30 * 1000));
   }
-  logger.log("Спам закончился");
+  logger.info("Спам закончился");
 };
