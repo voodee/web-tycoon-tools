@@ -237,23 +237,25 @@ module.exports = async (browser, logger, { token, userId }) => {
         );
       }
 
-      if (!content) {
+      if (!content && contents.length > 3) {
         content = contents[0];
       }
 
-      // публикуем
-      try {
-        await axios.post(
-          `${HOST}content/${userId}/${site.id}/${
-            content.id
-          }?access_token=${token}`
-        );
-        logger.info("Контент опубликован");
-      } catch (e) {
-        logger.error(
-          `Не удалось опубликовать контент`,
-          e && e.response && e.response.data
-        );
+      if (content) {
+        // публикуем
+        try {
+          await axios.post(
+            `${HOST}content/${userId}/${site.id}/${
+              content.id
+            }?access_token=${token}`
+          );
+          logger.info("Контент опубликован");
+        } catch (e) {
+          logger.error(
+            `Не удалось опубликовать контент`,
+            e && e.response && e.response.data
+          );
+        }
       }
     }
   }
