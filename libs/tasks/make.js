@@ -13,14 +13,6 @@ const contentTypes = {
   анонс: 7,
   опрос: 8
 };
-function swap(json) {
-  var ret = {};
-  for (var key in json) {
-    ret[json[key]] = key;
-  }
-  return ret;
-}
-const gg = swap(contentTypes);
 
 const getPageData = async (browser, userId, siteId) => {
   const page = await browser.newPage();
@@ -145,7 +137,10 @@ module.exports = async (browser, logger, { token, userId }) => {
               logger.info(
                 `Сняли работника ${task.workers[0]} с сайта ${site.domain}`
               );
-              task.workers[0].status = 1;
+              const worker = workers.find(
+                worker => worker.id === task.workers[0]
+              );
+              worker.status = 1;
             } catch (e) {
               logger.info(
                 `Ошибка снятия работника с задачи`,
