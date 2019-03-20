@@ -223,7 +223,7 @@ module.exports = async (browser, logger, { token, userId }) => {
     const contents = site.content.filter(({ status }) => status === 1);
     if (
       // если нет активного контента
-      // !isActiveContent &&
+      !isActiveContent &&
       // и если есть не опубликованный контент
       contents.length > 0
     ) {
