@@ -1,13 +1,13 @@
 const deleteAction = require("./delete");
 const setAction = require("./set");
 
-module.exports = async (browser, logger) => {
+module.exports = async (browser, logger, config) => {
   await Promise.all([
     (async () => {
       while (1) {
         // удаляем спамные сслыки
         try {
-          await deleteAction(browser, logger);
+          await deleteAction(browser, logger, config);
         } catch (e) {
           logger.error(
             "Ошибка при удаление спамных ссылок",
@@ -22,7 +22,7 @@ module.exports = async (browser, logger) => {
       while (1) {
         // ставим спамные ссылки
         try {
-          await setAction(browser, logger);
+          await setAction(browser, logger, config);
         } catch (e) {
           logger.error(
             "Ошибка при установки спамных ссылок",

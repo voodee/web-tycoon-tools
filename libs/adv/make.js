@@ -4,17 +4,8 @@ const qs = require("qs");
 const HOST = "https://game.web-tycoon.com/api/";
 const MAX_IMPORTUNITY = 120;
 
-module.exports = async (browser, logger) => {
+module.exports = async (browser, logger, { token, userId }) => {
   logger.info(`Задача по рекламе начата`);
-
-  const page = await browser.newPage();
-  await page.goto("https://game.web-tycoon.com/", {
-    waitUntil: "networkidle2"
-  });
-
-  const token = await page.evaluate(() => localStorage.token);
-  const userId = await page.evaluate(() => localStorage.userId);
-  await page.close();
 
   // получаем сайты пользователя
   const {
@@ -79,51 +70,55 @@ module.exports = async (browser, logger) => {
 
     const page = await browser.newPage();
 
-    await page.goto(
-      `https://game.web-tycoon.com/players/${userId}/sites/${site.id}`,
-      {
-        waitUntil: "networkidle2"
-      }
-    );
-    await page.addScriptTag({
-      url: "https://code.jquery.com/jquery-3.3.1.min.js"
-    });
-    await new Promise(res => setTimeout(res, 2 * 1000));
-    const ads = await page.evaluate(() => {
-      return $(".cardStats")
-        .map(function() {
-          return parseFloat(
-            $(this)
-              .find(".statsWr:eq(2)")
-              .text()
-              .replace(",", ".")
-          );
-        })
-        .toArray();
-    });
+    try {
+      await page.goto(
+        `https://game.web-tycoon.com/players/${userId}/sites/${site.id}`,
+        {
+          waitUntil: "networkidle2"
+        }
+      );
+      await page.addScriptTag({
+        url: "https://code.jquery.com/jquery-3.3.1.min.js"
+      });
+      await new Promise(res => setTimeout(res, 2 * 1000));
+      const ads = await page.evaluate(() => {
+        return $(".cardStats")
+          .map(function() {
+            return parseFloat(
+              $(this)
+                .find(".statsWr:eq(2)")
+                .text()
+                .replace(",", ".")
+            );
+          })
+          .toArray();
+      });
 
-    for (let adNumber = 0; adNumber < ads.length; ++adNumber) {
-      const adConv = ads[adNumber];
+      for (let adNumber = 0; adNumber < ads.length; ++adNumber) {
+        const adConv = ads[adNumber];
 
-      if (adConv < 1.5) {
-        const ad = site.ad[adNumber];
+        if (adConv < 1.5) {
+          const ad = site.ad[adNumber];
 
-        try {
-          await axios.delete(
-            `${HOST}ad_s/${userId}/${ad.id}/delete?access_token=${token}`
-          );
-          site.ad.splice(adNumber, 1);
+          try {
+            await axios.delete(
+              `${HOST}ad_s/${userId}/${ad.id}/delete?access_token=${token}`
+            );
+            site.ad.splice(adNumber, 1);
 
-          logger.info(
-            `Удалена реклама с низкой конверсией ${ad.id} с сайта ${site.id}`
-          );
-        } catch (e) {
-          logger.error(
-            `Ошибка удаления рекламы на сайте ${site.id}`,
-            e.response
-          );
+            logger.info(
+              `Удалена реклама с низкой конверсией ${ad.id} с сайта ${site.id}`
+            );
+          } catch (e) {
+            logger.error(
+              `Ошибка удаления рекламы на сайте ${site.id}`,
+              e.response
+            );
+          }
         }
       }
+    } catch (e) {
+      logger.error("ошибка удаления рекламы с низкой конверсией");
     }
 
     await page.close();

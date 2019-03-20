@@ -3,16 +3,7 @@ const qs = require("qs");
 
 const HOST = "https://game.web-tycoon.com/api/";
 
-module.exports = async (browser, logger) => {
-  const page = await browser.newPage();
-  await page.goto("https://game.web-tycoon.com/", {
-    waitUntil: "networkidle2"
-  });
-
-  const token = await page.evaluate(() => localStorage.token);
-  const userId = await page.evaluate(() => localStorage.userId);
-  await page.close();
-
+module.exports = async (browser, logger, { token, userId }) => {
   // получаем сайты пользователя
   const {
     data: { sites: userSites }
