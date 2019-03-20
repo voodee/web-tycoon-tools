@@ -1,11 +1,11 @@
 const make = require("./make");
 
-module.exports = async (browser, logger) => {
+module.exports = async (browser, logger, config) => {
   await Promise.all([
     (async () => {
       while (1) {
         try {
-          await make(browser, logger);
+          await make(browser, logger, config);
         } catch (e) {
           logger.error(
             "Ошибка при управление тасками",

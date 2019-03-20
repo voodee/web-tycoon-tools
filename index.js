@@ -21,11 +21,25 @@ let lastResult = ["..."];
 
     await auth(browser);
 
+    const page = await browser.newPage();
+    await page.goto("https://game.web-tycoon.com/", {
+      waitUntil: "networkidle2"
+    });
+
+    const token = await page.evaluate(() => localStorage.token);
+    const userId = await page.evaluate(() => localStorage.userId);
+    await page.close();
+
+    const config = {
+      token,
+      userId
+    };
+
     await Promise.all([
-      tasks(browser, console),
-      links(browser, console),
-      adv(browser, console),
-      workers(browser, console)
+      tasks(browser, console, config),
+      links(browser, console, config),
+      adv(browser, console, config),
+      workers(browser, console, config)
     ]);
 
     await browser.close();

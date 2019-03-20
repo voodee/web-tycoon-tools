@@ -3,49 +3,62 @@ const qs = require("qs");
 
 const HOST = "https://game.web-tycoon.com/api/";
 const MAX_IMPORTUNITY = 120;
+const contentTypes = {
+  аудио: 1,
+  видео: 2,
+  стрим: 3,
+  фото: 4,
+  стат: 5,
+  обзор: 6,
+  анонс: 7,
+  опрос: 8
+};
+function swap(json) {
+  var ret = {};
+  for (var key in json) {
+    ret[json[key]] = key;
+  }
+  return ret;
+}
+const gg = swap(contentTypes);
 
-const getHostingAllow = async (browser, userId, siteId) => {
+const getPageData = async (browser, userId, siteId) => {
   const page = await browser.newPage();
-  await page.goto(
-    `https://game.web-tycoon.com/players/${userId}/sites/${siteId}`,
-    {
-      waitUntil: "networkidle2"
-    }
-  );
-  await page.waitForSelector(".hostingLimit");
-  let { hostingLimitSource, trafSpeedSource } = await page.evaluate(() => {
-    return {
-      hostingLimitSource: document.getElementsByClassName("hostingLimit")[0]
-        .textContent,
-      trafSpeedSource: document.getElementsByClassName("trafSpeed")[0]
-        .textContent
-    };
-  });
+  let result = null;
+  try {
+    await page.goto(
+      `https://game.web-tycoon.com/players/${userId}/sites/${siteId}`,
+      {
+        waitUntil: "networkidle2"
+      }
+    );
+    await page.waitForSelector(".hostingLimit");
+    await new Promise(res => setTimeout(res, 200));
+    result = await page.evaluate(() => {
+      return {
+        hostingLimitSource: document.getElementsByClassName("hostingLimit")[0]
+          .textContent,
+        trafSpeedSource: document.getElementsByClassName("trafSpeed")[0]
+          .textContent,
+        comments: [
+          ...document.querySelectorAll(
+            ".commentsList .message.positive, .commentsList .message.neutral"
+          )
+        ]
+          .reduce((acc, el) => acc + el.innerText, "")
+          .toLowerCase(),
+        isActiveContentSource: !!document.querySelectorAll(
+          "#content-score-receiver .effectCard"
+        ).length
+      };
+    });
+  } catch (e) {}
   await page.close();
-  let hostingLimit = parseFloat(hostingLimitSource.replace(",", "."));
-  if (hostingLimitSource.includes("тыс")) {
-    hostingLimit *= 1000;
-  }
-  let trafSpeed = parseFloat(trafSpeedSource.replace(",", "."));
-  if (trafSpeedSource.includes("тыс")) {
-    trafSpeed *= 1000;
-  }
-  const diffTraf = trafSpeed / hostingLimit;
-
-  return diffTraf < 0.95;
+  return result;
 };
 
-module.exports = async (browser, logger) => {
+module.exports = async (browser, logger, { token, userId }) => {
   logger.info(`Задача по таскам начата`);
-
-  const page = await browser.newPage();
-  await page.goto("https://game.web-tycoon.com/", {
-    waitUntil: "networkidle2"
-  });
-
-  const token = await page.evaluate(() => localStorage.token);
-  const userId = await page.evaluate(() => localStorage.userId);
-  await page.close();
 
   // получаем сайты пользователя
   const {
@@ -57,11 +70,50 @@ module.exports = async (browser, logger) => {
     logger.info(`Смотрим таски с сайта ${site.domain}`);
 
     let hostingAllow = false;
+    let desiredContentId = null;
+    let desiredContentId2 = null;
+    let isActiveContent = true;
     try {
-      hostingAllow = await getHostingAllow(browser, userId, site.id);
+      const {
+        hostingLimitSource,
+        trafSpeedSource,
+        comments,
+        isActiveContentSource
+      } = await getPageData(browser, userId, site.id);
+
+      let hostingLimit = parseFloat(hostingLimitSource.replace(",", "."));
+      if (hostingLimitSource.includes("тыс")) {
+        hostingLimit *= 1000;
+      }
+      let trafSpeed = parseFloat(trafSpeedSource.replace(",", "."));
+      if (trafSpeedSource.includes("тыс")) {
+        trafSpeed *= 1000;
+      }
+      const diffTraf = trafSpeed / hostingLimit;
+
+      hostingAllow = diffTraf < 0.95;
+
+      // есть ли активный контент
+      isActiveContent = isActiveContentSource;
+
+      // считаем, какой контент хочет пользователь
+      const contentCost = Object.keys(contentTypes).reduce((acc, type) => {
+        const countType = (comments.match(new RegExp(type, "g")) || []).length;
+        acc.push([type, countType]);
+        return acc;
+      }, []);
+      const contentCostKeySorted = contentCost
+        .sort((a, b) => a[1] - b[1])
+        .reverse();
+
+      desiredContentId = contentTypes[contentCostKeySorted[0][0]];
+      desiredContentId2 = contentTypes[contentCostKeySorted[1][0]];
+
+      // comments
     } catch (e) {
       logger.error(
-        `Не удалось узнать лимиты хостинга для сайта ${site.domain}`
+        `Не удалось узнать лимиты хостинга для сайта ${site.domain}`,
+        e
       );
     }
 
@@ -71,12 +123,13 @@ module.exports = async (browser, logger) => {
       logger.info(`Смотрим таск ${taskName} с сайта ${site.domain}`);
 
       if (
+        // если таск полностью заполнен
         (taskName !== "marketing" &&
           site.limit[taskName] === site.progress[taskName]) ||
+        // или это маркетинг и заполнены 4 слота
         (taskName === "marketing" &&
           site.content.filter(({ status }) => status === 1).length === 4)
       ) {
-        // если таск полностью заполнен
         for (let taskNum = 0; taskNum < tasks.length; ++taskNum) {
           const task = tasks[taskNum];
 
@@ -92,6 +145,7 @@ module.exports = async (browser, logger) => {
               logger.info(
                 `Сняли работника ${task.workers[0]} с сайта ${site.domain}`
               );
+              task.workers[0].status = 1;
             } catch (e) {
               logger.info(
                 `Ошибка снятия работника с задачи`,
@@ -140,12 +194,6 @@ module.exports = async (browser, logger) => {
               `Поставили работника ${worker.id} на сайт ${site.domain}`
             );
           } catch (e) {
-            console.log(worker);
-            console.log(
-              "url",
-              `${HOST}sites/${userId}/${site.id}/${taskNumber +
-                1}/addTask?access_token=${token}`
-            );
             logger.info(
               `Ошибка поставноки работника на задачу`,
               e && e.response && e.response.data
@@ -164,6 +212,7 @@ module.exports = async (browser, logger) => {
       )
     ) {
       try {
+        // публикуем
         await axios.post(
           `${HOST}sites/${userId}/${site.id}/levelUp?access_token=${token}`
         );
@@ -171,6 +220,43 @@ module.exports = async (browser, logger) => {
       } catch (e) {
         logger.info(
           `Ошибка публикации сайта`,
+          e && e.response && e.response.data
+        );
+      }
+    }
+
+    const contents = site.content.filter(({ status }) => status === 1);
+    if (
+      // если нет активного контента
+      // !isActiveContent &&
+      // и если есть не опубликованный контент
+      contents.length > 0
+    ) {
+      // находим контент для публикации
+      let content = contents.find(
+        ({ contenttypeId }) => contenttypeId === desiredContentId
+      );
+      if (!content) {
+        content = contents.find(
+          ({ contenttypeId }) => contenttypeId === desiredContentId2
+        );
+      }
+
+      if (!content) {
+        content = contents[0];
+      }
+
+      // публикуем
+      try {
+        await axios.post(
+          `${HOST}content/${userId}/${site.id}/${
+            content.id
+          }?access_token=${token}`
+        );
+        logger.info("Контент опубликован");
+      } catch (e) {
+        logger.error(
+          `Не удалось опубликовать контент`,
           e && e.response && e.response.data
         );
       }
