@@ -71,8 +71,10 @@ module.exports = async (browser, logger) => {
       logger.info(`Смотрим таск ${taskName} с сайта ${site.domain}`);
 
       if (
-        site.limit[taskName] === site.progress[taskName] &&
-        taskName !== "marketing"
+        (taskName !== "marketing" &&
+          site.limit[taskName] === site.progress[taskName]) ||
+        (taskName === "marketing" &&
+          site.content.filter(({ status }) => status === 1).length === 4)
       ) {
         // если таск полностью заполнен
         for (let taskNum = 0; taskNum < tasks.length; ++taskNum) {
