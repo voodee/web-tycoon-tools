@@ -56,7 +56,7 @@ module.exports = async (browser, logger, { token, userId }) => {
   const {
     data: { sites, tasks, workers }
   } = await axios.get(`${HOST}users/${userId}/init?access_token=${token}`);
-  const userSites = sites.reverse();
+  const userSites = sites; //.reverse();
   for (let siteNumber = 0; siteNumber < userSites.length; ++siteNumber) {
     const site = userSites[siteNumber];
     logger.info(`Смотрим таски с сайта ${site.domain}`);
@@ -137,10 +137,10 @@ module.exports = async (browser, logger, { token, userId }) => {
               logger.info(
                 `Сняли работника ${task.workers[0]} с сайта ${site.domain}`
               );
-              const worker = workers.find(
-                worker => worker.id === task.workers[0]
-              );
-              worker.status = 1;
+              // const worker = workers.find(
+              //   worker => worker.id === task.workers[0]
+              // );
+              // worker.status = 1;
             } catch (e) {
               logger.info(
                 `Ошибка снятия работника с задачи`,
