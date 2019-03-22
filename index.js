@@ -13,38 +13,24 @@ const app = express();
 let lastResult = ["..."];
 
 (async () => {
-  try {
+  while (true) {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
+    try {
+      const config = await auth(browser);
 
-    await auth(browser);
-
-    const page = await browser.newPage();
-    await page.goto("https://game.web-tycoon.com/", {
-      waitUntil: "networkidle2"
-    });
-
-    const token = await page.evaluate(() => localStorage.token);
-    const userId = await page.evaluate(() => localStorage.userId);
-    await page.close();
-
-    const config = {
-      token,
-      userId
-    };
-
-    await Promise.all([
-      tasks(browser, console, config),
-      links(browser, console, config),
-      adv(browser, console, config),
-      workers(browser, console, config)
-    ]);
-
+      await Promise.all([
+        tasks(browser, console, config)
+        // links(browser, console, config)
+        // adv(browser, console, config),
+        // workers(browser, console, config)
+      ]);
+    } catch (e) {
+      console.error(`Ой, беда!`, (e && e.response && e.response.data) || e);
+    }
     await browser.close();
-  } catch (e) {
-    console.error(e);
   }
 })();
 

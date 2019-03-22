@@ -1,5 +1,6 @@
 const { get, post } = require("axios");
 const qs = require("qs");
+const auth = require("../../helpers/auth");
 
 const HOST = "https://game.web-tycoon.com/api/";
 
@@ -53,6 +54,20 @@ module.exports = async (browser, logger, { token, userId }) => {
       );
       logger.log("Поставлена спамная ссылка", data);
     } catch (e) {
+      if (
+        e &&
+        e.response &&
+        e.response.data &&
+        e.response.data.error &&
+        e.response.data.error.code === "AUTHORIZATION_REQUIRED"
+      ) {
+        const data = await auth(browser);
+        config.token = data.token;
+        config.userId = data.userId;
+        config.connectionId = data.connectionId;
+        config.ts = data.ts;
+        config.headers = data.headers;
+      }
       logger.error(
         "Ошибка при поставноке спамной ссылки",
         e.response.data.error

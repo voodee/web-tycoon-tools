@@ -1,27 +1,51 @@
-const axios = require("axios");
+module.exports = async (
+  browser,
+  logger,
+  { token, userId, connectionId, ts, headers }
+) => {
+  logger.info(`Задача по удалению спама начата`);
+  const page = await browser.newPage();
 
-module.exports = async (browser, logger, { token, userId }) => {
-  // получаем сайты пользователя
-  const {
-    data: { sites: userSites }
-  } = await axios.get(
-    `https://game.web-tycoon.com/api/users/${userId}/init?access_token=${token}`
-  );
+  await page.goto(`https://game.web-tycoon.com/players/${userId}/sites`, {
+    waitUntil: "networkidle2"
+  });
+  await page.waitForSelector(".siteCard");
 
-  for (let i = 0; i < userSites.length; ++i) {
-    const site = userSites[i];
-    try {
-      const { data } = await axios.delete(
-        `https://game.web-tycoon.com/api/links/${userId}/${
-          site.id
-        }/spam?access_token=${token}`
-      );
-      logger.log(`Почищены ссылки на сайте ${site.id}`);
-    } catch (e) {
-      logger.log(
-        `Ошибка чистки ссылок на сайте ${site.id} - ${e.response.data}`
-      );
+  try {
+    let sites = await page.$$(".siteCard");
+    for (let siteNumber = 0; siteNumber < sites.length; ++siteNumber) {
+      await page.click(`.linkSites`);
+      await page.waitForSelector(".siteCard");
+      // :(
+      await new Promise(res => setTimeout(res, 1 * 1000));
+      let sites = await page.$$(".siteCard");
+      logger.info(`Ищем спам на сайте ${siteNumber}`);
+      // :(
+      await new Promise(res => setTimeout(res, 1 * 1000));
+      await sites[siteNumber].click();
+      await page.waitForSelector(".aboutWr");
+
+      await page.click(`.tabWrapper .tab:nth-child(1)`);
+
+      await page.waitForSelector(".externalLinkWr");
+      const buttonsSpam = await page.$$(".button-spam");
+      if (buttonsSpam.length < 1) {
+        logger.info(`На сайте ${siteNumber} не найдено спама`);
+        continue;
+      }
+      await page.click(".button-spam");
+      await page.waitForSelector(".siteComments");
+      const [, , buttonRemove] = await page.$$(".externalLinkWr button");
+      // :(
+      await new Promise(res => setTimeout(res, 1 * 1000));
+      await buttonRemove.click();
+      await new Promise(res => setTimeout(res, 1 * 1000));
+      logger.info(`На сайте ${siteNumber} удалена реклама`);
     }
-    await new Promise(res => setTimeout(res, 1 * 1000));
+  } catch (e) {
+    logger.error(`Ошибка чистки ссылок`, e);
   }
+
+  await page.close();
+  logger.info(`Задача по удалению спама закончена`);
 };
