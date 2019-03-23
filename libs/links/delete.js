@@ -35,11 +35,12 @@ module.exports = async (
       }
       await page.click(".button-spam");
       await page.waitForSelector(".siteComments");
-      const [, , buttonRemove] = await page.$$(".externalLinkWr button");
+      await new Promise(res => setTimeout(res, 3 * 1000));
+      const [, , $buttonRemove] = await page.$$(".externalLinkWr button");
       // :(
       await new Promise(res => setTimeout(res, 1 * 1000));
-      await buttonRemove.click();
-      await new Promise(res => setTimeout(res, 1 * 1000));
+      await page.evaluate(el => el.click(), $buttonRemove);
+      await new Promise(res => setTimeout(res, 2 * 1000));
       logger.info(`На сайте ${siteNumber} удалена реклама`);
     }
   } catch (e) {
