@@ -14,23 +14,16 @@ let lastResult = ["..."];
 
 (async () => {
   while (true) {
-    const browser = await puppeteer.launch({
-      headless: false,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    });
     try {
-      const config = await auth(browser);
-
       await Promise.all([
-        tasks(browser, console, config)
-        // links(browser, console, config)
-        // adv(browser, console, config),
-        // workers(browser, console, config)
+        tasks(console),
+        links(console),
+        adv(console),
+        workers(console)
       ]);
     } catch (e) {
       console.error(`Ой, беда!`, (e && e.response && e.response.data) || e);
     }
-    await browser.close();
   }
 })();
 
