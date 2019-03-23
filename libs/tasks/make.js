@@ -155,7 +155,7 @@ module.exports = async (
           }
 
           const isDdos = await page.$(".effectCard .debuff");
-          const hostingAllow = trafSpeed / hostingLimit < 0.95;
+          const hostingAllow = trafSpeed / hostingLimit < 0.9;
 
           if (
             // если лимит хостинга позволяет
