@@ -43,7 +43,7 @@ const findWorker = async (page, $task, logger) => {
   await page.evaluate(el => el.click(), $addWorkerButton);
   await page.waitForSelector(".popupPortal");
   // :(
-  await new Promise(res => setTimeout(res, 1 * 1000));
+  await new Promise(res => setTimeout(res, 3 * 1000));
 
   // фильтруем, оставляем только по специальности
   const $cards = await page.$$(".popupPortal .cardContainer:not(.inactive)");
@@ -51,30 +51,34 @@ const findWorker = async (page, $task, logger) => {
     const mainSkill = await getMainSkill($card);
     const extraEnergy = await $card.$(".extraEnergy");
 
-    const $energy = await $card.$(".energy");
-    const energyWidthSource = await $energy.getProperty("offsetWidth");
-    const energyWidth = await energyWidthSource.jsonValue();
+    let energyLast = 0;
+    if (!extraEnergy) {
+      const $energy = await $card.$(".energy");
+      const energyWidthSource = await $energy.getProperty("offsetWidth");
+      const energyWidth = await energyWidthSource.jsonValue();
 
-    const $energyBar = await $card.$(".energyBar");
-    const energyBarWidthSource = await $energyBar.getProperty("offsetWidth");
-    const energyBarWidth = await energyBarWidthSource.jsonValue();
+      const $energyBar = await $card.$(".energyBar");
+      const energyBarWidthSource = await $energyBar.getProperty("offsetWidth");
+      const energyBarWidth = await energyBarWidthSource.jsonValue();
+      energyLast = energyWidth / energyBarWidth;
+    }
     if (
       // если это нужный скилл
       skill === mainSkill &&
       // если у него энергии больше 5%
-      (extraEnergy || energyWidth / energyBarWidth > 0.05)
+      (extraEnergy || energyLast > 0.05)
     ) {
-      await page.evaluate(el => el.click(), $card);
-      await new Promise(res => setTimeout(res, 1 * 1000));
+      await $card.click();
+      await new Promise(res => setTimeout(res, 2 * 1000));
       logger.info(`Исполнитель ${skill} поставлен на задачу`);
       return;
     }
   }
   // закрываем окно
   const $modalClose = await page.$(".modalClose");
-  // if ($modalClose) {
-  // }
-  await page.evaluate(el => el.click(), $modalClose);
+  // await page.evaluate(el => el.click(), $modalClose);
+  await $modalClose.click();
+  await new Promise(res => setTimeout(res, 2 * 1000));
 };
 
 module.exports = async (
@@ -88,6 +92,7 @@ module.exports = async (
   await page.goto(`https://game.web-tycoon.com/players/${userId}/sites`, {
     waitUntil: "networkidle2"
   });
+
   await page.waitForSelector(".siteCard");
 
   try {
@@ -111,10 +116,11 @@ module.exports = async (
        * Таски
        **/
       // проходим по таскам
-      const $tasks = await page.$$(".taskItem:not(.marketing)");
-      for (let $task of $tasks) {
+      let $tasks = await page.$$(".taskItem:not(.marketing)");
+      for (let taskNumber = 0; taskNumber < $tasks.length; ++taskNumber) {
+        let $tasks = await page.$$(".taskItem:not(.marketing)");
+        const $task = $tasks[taskNumber];
         // прогресс
-        // TODO destory
         const $progressBar = await $task.$(".progressBar");
         const progressBarWidthSource = await $progressBar.getProperty(
           "offsetWidth"
@@ -148,15 +154,20 @@ module.exports = async (
             trafSpeed *= 1000;
           }
 
-          // ToDo: DDOS
+          const isDdos = await page.$(".effectCard .debuff");
           const hostingAllow = trafSpeed / hostingLimit < 0.95;
 
-          // если лимит хостинга позволяет
-          if (hostingAllow) {
+          if (
+            // если лимит хостинга позволяет
+            hostingAllow &&
+            // и сайт не ДДОСят
+            !isDdos
+          ) {
             // то ставим работника
             await findWorker(page, $task, logger);
           }
         }
+        await new Promise(res => setTimeout(res, 2 * 1000));
       }
 
       /**

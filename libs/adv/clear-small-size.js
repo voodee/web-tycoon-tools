@@ -28,6 +28,7 @@ module.exports = async (browser, logger, { token, userId }) => {
     const $cards = await page.$$(".adWr .grid .itemWr:not(.offersAd)");
     // const $cardStats = await page.$$(".cardStats");
     for (let $card of $cards) {
+      // ToDo destroy
       const $stats = await $card.$$(".statsWr");
       const $stat = $stats[2];
       const text = await (await $stat.getProperty("textContent")).jsonValue();
