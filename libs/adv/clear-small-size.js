@@ -25,10 +25,10 @@ module.exports = async (browser, logger, { token, userId }) => {
     await new Promise(res => setTimeout(res, 1 * 1000));
 
     /////
-    const $cards = await page.$$(".adWr .grid .itemWr:not(.offersAd)");
-    // const $cardStats = await page.$$(".cardStats");
-    for (let $card of $cards) {
-      // ToDo destroy
+    let $cards = await page.$$(".adWr .grid .itemWr:not(.offersAd)");
+    for (let cardNumber = 0; cardNumber < $cards.length; ++cardNumber) {
+      $cards = await page.$$(".adWr .grid .itemWr:not(.offersAd)");
+      const $card = $cards[cardNumber];
       const $stats = await $card.$$(".statsWr");
       const $stat = $stats[2];
       const text = await (await $stat.getProperty("textContent")).jsonValue();
