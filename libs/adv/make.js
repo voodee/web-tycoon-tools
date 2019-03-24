@@ -12,12 +12,7 @@ module.exports = async (
   logger.info(`Задача по поиску рекламы начата`);
 
   // получаем сайты пользователя
-  const {
-    data: { sites: userSites }
-  } = await axios.get(
-    `${HOST}users/${userId}/init?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
-    { headers }
-  );
+  const userSites = initData.sites;
 
   // ищем новую рекламу
   logger.info(`ищем новую рекламу`);

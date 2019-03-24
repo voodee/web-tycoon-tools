@@ -12,12 +12,7 @@ module.exports = async (
   logger.info(`Задача по включению рекламы начата`);
 
   // получаем сайты пользователя
-  const {
-    data: { sites: userSites }
-  } = await axios.get(
-    `${HOST}users/${userId}/init?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
-    { headers }
-  );
+  const userSites = initData.sites;
 
   // Включаем выключенную рекламу
   logger.info(`Включаем выключенную рекламу`);
@@ -46,7 +41,7 @@ module.exports = async (
             (e && e.response && e.response.data) || e
           );
         }
-
+        ad.status = 1;
         logger.info(`Включена реклама ${ad.id} на сайте ${site.id}`);
       }
     }

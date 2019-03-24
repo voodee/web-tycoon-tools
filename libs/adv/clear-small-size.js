@@ -26,7 +26,7 @@ module.exports = async (browser, logger, { token, userId, userAgent }) => {
     // :(
     await new Promise(res => setTimeout(res, 1 * 1000));
     let sites = await page.$$(".siteCard");
-    logger.info(`Смотрим задачи на сайте ${siteNumber - 1}`);
+    logger.info(`Смотрим рекламу на сайте ${siteNumber - 1}`);
     // :(
     await new Promise(res => setTimeout(res, 1 * 1000));
     await sites[siteNumber - 1].click();

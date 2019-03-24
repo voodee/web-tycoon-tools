@@ -1,9 +1,12 @@
 const puppeteer = require("puppeteer");
+const axios = require("axios");
 const auth = require("../../helpers/auth");
 const make = require("./make");
 const clearSmallSize = require("./clear-small-size");
 const clearBadTheme = require("./clear-bad-theme");
 const enable = require("./enable");
+
+const HOST = "https://game.web-tycoon.com/api/";
 
 module.exports = async (logger, { userAgent }) => {
   const browser = await puppeteer.launch({
@@ -23,6 +26,14 @@ module.exports = async (logger, { userAgent }) => {
   };
 
   while (1) {
+    // получаем сайты пользователя
+    config.initData = (await axios.get(
+      `${HOST}users/${config.userId}/init?access_token=${
+        config.token
+      }&connectionId=${config.connectionId}&ts=${config.ts}`,
+      { headers: config.headers }
+    )).data;
+
     try {
       // поиск рекламы
       await make(browser, logger, config);
