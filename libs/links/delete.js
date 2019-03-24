@@ -1,10 +1,20 @@
 module.exports = async (
   browser,
   logger,
-  { token, userId, connectionId, ts, headers }
+  { token, userId, connectionId, ts, headers, userAgent }
 ) => {
   logger.info(`Задача по удалению спама начата`);
   const page = await browser.newPage();
+
+  const width = 1196;
+  const height = 820;
+  await page.emulate({
+    userAgent,
+    viewport: {
+      width,
+      height
+    }
+  });
 
   await page.goto(`https://game.web-tycoon.com/players/${userId}/sites`, {
     waitUntil: "networkidle2"
@@ -39,7 +49,8 @@ module.exports = async (
       const [, , $buttonRemove] = await page.$$(".externalLinkWr button");
       // :(
       await new Promise(res => setTimeout(res, 1 * 1000));
-      await page.evaluate(el => el.click(), $buttonRemove);
+      // await page.evaluate(el => el.click(), $buttonRemove);
+      await $buttonRemove.click();
       await new Promise(res => setTimeout(res, 2 * 1000));
       logger.info(`На сайте ${siteNumber} удалена реклама`);
     }

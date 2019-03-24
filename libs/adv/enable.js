@@ -4,13 +4,14 @@ const qs = require("qs");
 const HOST = "https://game.web-tycoon.com/api/";
 const MAX_IMPORTUNITY = 120;
 
-module.exports = async (browser, logger, { token, userId }) => {
+module.exports = async (
+  browser,
+  logger,
+  { token, userId, headers, initData, connectionId, ts }
+) => {
   logger.info(`Задача по включению рекламы начата`);
 
-  // получаем сайты пользователя
-  const {
-    data: { sites: userSites }
-  } = await axios.get(`${HOST}users/${userId}/init?access_token=${token}`);
+  const userSites = initData.sites;
 
   // // Включаем выключенную рекламу
   logger.info(`Включаем выключенную рекламу`);
@@ -23,10 +24,15 @@ module.exports = async (browser, logger, { token, userId }) => {
       if (ad.status === 0) {
         try {
           await axios.post(
-            `${HOST}ad_s/${userId}/${site.id}/add?access_token=${token}`,
+            `${HOST}ad_s/${userId}/${
+              site.id
+            }/add?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
             qs.stringify({
-              adId: ad.id
-            })
+              adId: ad.id,
+              connectionId,
+              ts
+            }),
+            { headers }
           );
         } catch (e) {
           logger.error(

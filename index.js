@@ -1,5 +1,6 @@
 const puppeteer = require("puppeteer");
 const express = require("express");
+const ua = require("useragent-generator");
 require("dotenv").config();
 
 const auth = require("./helpers/auth");
@@ -13,13 +14,15 @@ const app = express();
 let lastResult = ["..."];
 
 (async () => {
+  const config = {};
+  config.userAgent = ua.chrome(72);
   while (true) {
     try {
       await Promise.all([
-        tasks(console),
-        links(console),
-        adv(console),
-        workers(console)
+        tasks(console, config),
+        links(console, config),
+        adv(console, config),
+        workers(console, config)
       ]);
     } catch (e) {
       console.error(`Ой, беда!`, (e && e.response && e.response.data) || e);

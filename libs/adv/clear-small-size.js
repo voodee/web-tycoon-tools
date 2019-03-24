@@ -1,8 +1,17 @@
-module.exports = async (browser, logger, { token, userId }) => {
+module.exports = async (browser, logger, { token, userId, userAgent }) => {
   // удаляем рекламу с низкой конверсией
   logger.info(`удаляем рекламу с низкой конверсией`);
   const page = await browser.newPage();
 
+  const width = 1196;
+  const height = 820;
+  await page.emulate({
+    userAgent,
+    viewport: {
+      width,
+      height
+    }
+  });
   await page.goto(`https://game.web-tycoon.com/players/${userId}/sites`, {
     waitUntil: "networkidle2"
   });
@@ -25,10 +34,10 @@ module.exports = async (browser, logger, { token, userId }) => {
     await new Promise(res => setTimeout(res, 1 * 1000));
 
     /////
-    let $cards = await page.$$(".adWr .grid .itemWr:not(.offersAd)");
-    for (let cardNumber = 0; cardNumber < $cards.length; ++cardNumber) {
-      $cards = await page.$$(".adWr .grid .itemWr:not(.offersAd)");
-      const $card = $cards[cardNumber];
+    const $cards = await page.$$(
+      ".adWr .grid .itemWr:not(.offersAd):not(.inactiveAd)"
+    );
+    for (let $card of $cards) {
       const $stats = await $card.$$(".statsWr");
       const $stat = $stats[2];
       const text = await (await $stat.getProperty("textContent")).jsonValue();

@@ -4,18 +4,29 @@ const qs = require("qs");
 const HOST = "https://game.web-tycoon.com/api/";
 const MAX_IMPORTUNITY = 120;
 
-module.exports = async (browser, logger, { token, userId }) => {
+module.exports = async (
+  browser,
+  logger,
+  { token, userId, userAgent, initData, headers, connectionId, ts }
+) => {
   logger.info(`Задача по поиску рекламы начата`);
 
   // получаем сайты пользователя
-  const {
-    data: { sites: userSites }
-  } = await axios.get(`${HOST}users/${userId}/init?access_token=${token}`);
+  const userSites = initData.sites;
 
   // ищем новую рекламу
   logger.info(`ищем новую рекламу`);
 
   const page = await browser.newPage();
+  const width = 1196;
+  const height = 820;
+  await page.emulate({
+    userAgent,
+    viewport: {
+      width,
+      height
+    }
+  });
   await page.goto(`https://game.web-tycoon.com/players/${userId}/sites`, {
     waitUntil: "networkidle2"
   });
@@ -44,7 +55,12 @@ module.exports = async (browser, logger, { token, userId }) => {
         await axios.post(
           `${HOST}ad_s/ad/${userId}/generateOffers/${
             site.id
-          }/1?access_token=${token}`
+          }/1?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
+          qs.stringify({
+            connectionId,
+            ts
+          }),
+          { headers }
         );
       } catch (e) {
         console.log(
@@ -63,7 +79,12 @@ module.exports = async (browser, logger, { token, userId }) => {
       await axios.post(
         `${HOST}ad_s/ad/${userId}/generateOffers/${
           site.id
-        }/0?access_token=${token}`
+        }/0?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
+        qs.stringify({
+          connectionId,
+          ts
+        }),
+        { headers }
       );
     } catch (e) {
       console.log(`Ошибка поиска рекламы на сайте ${site.id}`, e.response.data);

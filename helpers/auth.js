@@ -1,6 +1,16 @@
-module.exports = async browser => {
+module.exports = async (browser, { userAgent }) => {
   const config = {};
   const page = await browser.newPage();
+
+  const width = 1196;
+  const height = 820;
+  await page.emulate({
+    userAgent,
+    viewport: {
+      width,
+      height
+    }
+  });
   await page.setRequestInterception(true);
 
   page.on("request", request => {
@@ -12,6 +22,12 @@ module.exports = async browser => {
       config.headers = request.headers();
     }
     request.continue();
+  });
+  page.on("response", async response => {
+    const url = response.url();
+    if (url.includes("init")) {
+      config.initData = await response.json();
+    }
   });
 
   await page.goto("https://game.web-tycoon.com/#login", {

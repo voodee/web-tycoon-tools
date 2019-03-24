@@ -1,14 +1,20 @@
 const { get, post } = require("axios");
 const qs = require("qs");
-const auth = require("../../helpers/auth");
 
 const HOST = "https://game.web-tycoon.com/api/";
 
-module.exports = async (browser, logger, { token, userId }) => {
+module.exports = async (
+  browser,
+  logger,
+  { token, userId, connectionId, ts, headers }
+) => {
   // получаем сайты пользователя
   const {
     data: { sites: userSites }
-  } = await get(`${HOST}users/${userId}/init?access_token=${token}`);
+  } = await get(
+    `${HOST}users/${userId}/init?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
+    { headers }
+  );
   // получаем темы сайтов пользователя
   const siteTemes = userSites.map(site => +site.sitethemeId);
 
@@ -20,7 +26,8 @@ module.exports = async (browser, logger, { token, userId }) => {
         const {
           data: { leaderboard }
         } = await get(
-          `${HOST}leaderboard/getTraffic/${userId}/${i}?epochId=${epochId}&access_token=${token}`
+          `${HOST}leaderboard/getTraffic/${userId}/${i}?epochId=${epochId}&access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
+          { headers }
         );
         sites = [...sites, ...leaderboard];
       } catch (e) {
@@ -47,27 +54,16 @@ module.exports = async (browser, logger, { token, userId }) => {
       const { data } = await post(
         `${HOST}links/${userId}/${site.siteId}/${
           userSite.id
-        }/2?access_token=${token}`,
+        }/2?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
         qs.stringify({
-          access_token: token
-        })
+          access_token: token,
+          connectionId,
+          ts
+        }),
+        { headers }
       );
       logger.log("Поставлена спамная ссылка", data);
     } catch (e) {
-      if (
-        e &&
-        e.response &&
-        e.response.data &&
-        e.response.data.error &&
-        e.response.data.error.code === "AUTHORIZATION_REQUIRED"
-      ) {
-        const data = await auth(browser);
-        config.token = data.token;
-        config.userId = data.userId;
-        config.connectionId = data.connectionId;
-        config.ts = data.ts;
-        config.headers = data.headers;
-      }
       logger.error(
         "Ошибка при поставноке спамной ссылки",
         e.response.data.error

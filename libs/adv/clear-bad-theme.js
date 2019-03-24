@@ -3,14 +3,15 @@ const axios = require("axios");
 const HOST = "https://game.web-tycoon.com/api/";
 const MAX_IMPORTUNITY = 120;
 
-module.exports = async (browser, logger, { token, userId }) => {
+module.exports = async (
+  browser,
+  logger,
+  { token, userId, headers, initData, connectionId, ts }
+) => {
   // удаляем не тематическую рекламу
   logger.info(`удаляем не тематическую рекламу`);
 
-  // получаем сайты пользователя
-  const {
-    data: { sites: userSites }
-  } = await axios.get(`${HOST}users/${userId}/init?access_token=${token}`);
+  const userSites = initData.sites;
 
   for (let siteNumber = 0; siteNumber < userSites.length; ++siteNumber) {
     const site = userSites[siteNumber];
@@ -25,7 +26,10 @@ module.exports = async (browser, logger, { token, userId }) => {
 
       if (ad.adthemeId !== site.sitethemeId) {
         await axios.delete(
-          `${HOST}ad_s/${userId}/${ad.id}/delete?access_token=${token}`
+          `${HOST}ad_s/${userId}/${
+            ad.id
+          }/delete?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
+          { headers }
         );
         site.ad.splice(adNumber, 1);
 
