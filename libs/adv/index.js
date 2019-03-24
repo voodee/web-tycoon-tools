@@ -2,9 +2,7 @@ const puppeteer = require("puppeteer");
 const axios = require("axios");
 const auth = require("../../helpers/auth");
 const make = require("./make");
-const clearSmallSize = require("./clear-small-size");
-const clearBadTheme = require("./clear-bad-theme");
-const enable = require("./enable");
+const clear = require("./clear");
 
 const HOST = "https://game.web-tycoon.com/api/";
 
@@ -70,43 +68,11 @@ module.exports = async (logger, { userAgent }) => {
     }
 
     try {
-      // очистка рекламы с низкой конверсией
-      await clearSmallSize(browser, logger, config);
+      // очистка рекламы
+      await clear(browser, logger, config);
     } catch (e) {
       logger.error(
-        "Ошибка очистки рекламы с низкой конверсией",
-        (e && e.response && e.response.data) || e
-      );
-      if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
-        config = {
-          userAgent,
-          ...(await auth(browser, { userAgent }))
-        };
-      }
-    }
-
-    try {
-      // очистка не тематической рекламы
-      await clearBadTheme(browser, logger, config);
-    } catch (e) {
-      logger.error(
-        "Ошибка очистки не тематической рекламы",
-        (e && e.response && e.response.data) || e
-      );
-      if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
-        config = {
-          userAgent,
-          ...(await auth(browser, { userAgent }))
-        };
-      }
-    }
-
-    try {
-      // включение рекламы
-      await enable(browser, logger, config);
-    } catch (e) {
-      logger.error(
-        "Ошибка включение рекламы",
+        "Ошибка очистки рекламы",
         (e && e.response && e.response.data) || e
       );
       if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
