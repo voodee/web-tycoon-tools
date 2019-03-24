@@ -54,10 +54,14 @@ module.exports = async (
     for (let cardNumber = 0; cardNumber < $cards.length; ++cardNumber) {
       const $card = $cards[cardNumber];
       const ad = site.ad[cardNumber];
+      if (!ad) {
+        // это слишком свежая реклама
+        contunue;
+      }
 
       logger.info(`удаляем не тематическую рекламу`);
       // если категория общая, то оставляем всю рекламу
-      if (ad && site.sitethemeId !== 19) {
+      if (site.sitethemeId !== 19) {
         if (ad.adthemeId !== site.sitethemeId) {
           await remove(page, $card);
           logger.info(`Удалена не тематическая реклама с сайта ${siteNumber}`);
@@ -69,7 +73,7 @@ module.exports = async (
       // await new Promise(res => setTimeout(res, 1 * 1000));
 
       logger.info(`включаем выключенную рекламу`);
-      if (ad && ad.status === 0) {
+      if (ad.status === 0) {
         const $toggler = await $card.$(".adCardFooter .toggler");
         await $toggler.click();
         logger.info(`Включена реклама с сайта ${siteNumber}`);
