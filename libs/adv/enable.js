@@ -11,9 +11,15 @@ module.exports = async (
 ) => {
   logger.info(`Задача по включению рекламы начата`);
 
-  const userSites = initData.sites;
+  // получаем сайты пользователя
+  const {
+    data: { sites: userSites }
+  } = await axios.get(
+    `${HOST}users/${userId}/init?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
+    { headers }
+  );
 
-  // // Включаем выключенную рекламу
+  // Включаем выключенную рекламу
   logger.info(`Включаем выключенную рекламу`);
   for (let siteNumber = 0; siteNumber < userSites.length; ++siteNumber) {
     const site = userSites[siteNumber];

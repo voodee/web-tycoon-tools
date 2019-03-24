@@ -11,7 +11,13 @@ module.exports = async (
   // удаляем не тематическую рекламу
   logger.info(`удаляем не тематическую рекламу`);
 
-  const userSites = initData.sites;
+  // получаем сайты пользователя
+  const {
+    data: { sites: userSites }
+  } = await axios.get(
+    `${HOST}users/${userId}/init?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
+    { headers }
+  );
 
   for (let siteNumber = 0; siteNumber < userSites.length; ++siteNumber) {
     const site = userSites[siteNumber];
