@@ -7,16 +7,11 @@ const MAX_IMPORTUNITY = 120;
 module.exports = async (
   browser,
   logger,
-  { token, userId, headers, connectionId, ts }
+  { token, userId, headers, connectionId, ts, initData }
 ) => {
   logger.info(`Задача по отправке работников в отпуск начата`);
 
-  const {
-    data: { workers }
-  } = await axios.get(
-    `${HOST}users/${userId}/init?access_token=${token}&connectionId=${connectionId}&ts=${ts}`,
-    { headers }
-  );
+  const workers = initData.workers;
 
   for (let workerNumber = 0; workerNumber < workers.length; ++workerNumber) {
     const { id, status, energyValue } = workers[workerNumber];

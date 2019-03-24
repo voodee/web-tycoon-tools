@@ -33,6 +33,13 @@ module.exports = async (logger, { userAgent }) => {
       }
     });
 
+    page.on("response", async response => {
+      const url = response.url();
+      if (url.includes("init")) {
+        config.initData = await response.json();
+      }
+    });
+
     await page.goto(
       `https://game.web-tycoon.com/players/${config.userId}/sites`,
       {
