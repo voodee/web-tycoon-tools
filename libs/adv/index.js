@@ -17,7 +17,7 @@ module.exports = async (logger, { userAgent }) => {
       "--disable-extensions-http-throttling"
     ]
   });
-  const config = {
+  let config = {
     userAgent,
     ...(await auth(browser, { userAgent }))
   };
@@ -31,6 +31,12 @@ module.exports = async (logger, { userAgent }) => {
         "Ошибка поиска рекламы",
         (e && e.response && e.response.data) || e
       );
+      if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
+        config = {
+          userAgent,
+          ...(await auth(browser, { userAgent }))
+        };
+      }
     }
 
     try {
@@ -41,6 +47,12 @@ module.exports = async (logger, { userAgent }) => {
         "Ошибка очистки рекламы с низкой конверсией",
         (e && e.response && e.response.data) || e
       );
+      if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
+        config = {
+          userAgent,
+          ...(await auth(browser, { userAgent }))
+        };
+      }
     }
 
     try {
@@ -51,6 +63,12 @@ module.exports = async (logger, { userAgent }) => {
         "Ошибка очистки не тематической рекламы",
         (e && e.response && e.response.data) || e
       );
+      if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
+        config = {
+          userAgent,
+          ...(await auth(browser, { userAgent }))
+        };
+      }
     }
 
     try {
@@ -61,6 +79,12 @@ module.exports = async (logger, { userAgent }) => {
         "Ошибка включение рекламы",
         (e && e.response && e.response.data) || e
       );
+      if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
+        config = {
+          userAgent,
+          ...(await auth(browser, { userAgent }))
+        };
+      }
     }
     // каждые 30 сек
     await new Promise(res => setTimeout(res, 30 * 1000));
