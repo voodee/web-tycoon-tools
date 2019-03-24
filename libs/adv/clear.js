@@ -8,13 +8,17 @@ const remove = async (page, $card) => {
   await new Promise(res => setTimeout(res, 1 * 1000));
 };
 
-module.exports = async (
-  browser,
-  logger,
-  { token, userId, userAgent, initData }
-) => {
+module.exports = async (browser, logger, { token, userId, userAgent }) => {
   logger.info(`смотрим рекламу`);
+  let initData;
   const page = await browser.newPage();
+  page.on("response", async response => {
+    const url = response.url();
+    if (url.includes("init")) {
+      // получаем сайты пользователя
+      initData = await response.json();
+    }
+  });
 
   const width = 1196;
   const height = 820;
@@ -51,13 +55,13 @@ module.exports = async (
 
     /////
     const $cards = await page.$$(".adWr .grid .itemWr:not(.offersAd)");
+    if ($cards.length !== site.ad.length) {
+      // это слишком свежая реклама
+      contunue;
+    }
     for (let cardNumber = 0; cardNumber < $cards.length; ++cardNumber) {
       const $card = $cards[cardNumber];
       const ad = site.ad[cardNumber];
-      if (!ad) {
-        // это слишком свежая реклама
-        contunue;
-      }
 
       logger.info(`удаляем не тематическую рекламу`);
       // если категория общая, то оставляем всю рекламу

@@ -7,17 +7,19 @@ const MAX_IMPORTUNITY = 120;
 module.exports = async (
   browser,
   logger,
-  { token, userId, userAgent, initData, headers, connectionId, ts }
+  { token, userId, userAgent, headers, connectionId, ts }
 ) => {
   logger.info(`Задача по поиску рекламы начата`);
 
-  // получаем сайты пользователя
-  const userSites = initData.sites;
-
-  // ищем новую рекламу
-  logger.info(`ищем новую рекламу`);
-
   const page = await browser.newPage();
+  let initData;
+  page.on("response", async response => {
+    const url = response.url();
+    if (url.includes("init")) {
+      // получаем сайты пользователя
+      initData = await response.json();
+    }
+  });
   const width = 1196;
   const height = 820;
   await page.emulate({
@@ -30,6 +32,10 @@ module.exports = async (
   await page.goto(`https://game.web-tycoon.com/players/${userId}/sites`, {
     waitUntil: "networkidle2"
   });
+  await page.waitForSelector(".siteCard");
+
+  // получаем сайты пользователя
+  const userSites = initData.sites;
   for (let siteNumber = 0; siteNumber < userSites.length; ++siteNumber) {
     const site = userSites[siteNumber];
 

@@ -19,10 +19,10 @@ let lastResult = ["..."];
   while (true) {
     try {
       await Promise.all([
-        tasks(console, config),
-        links(console, config),
-        adv(console, config),
-        workers(console, config)
+        // tasks(console, config),
+        // links(console, config),
+        adv(console, config)
+        // workers(console, config)
       ]);
     } catch (e) {
       console.error(`Ой, беда!`, (e && e.response && e.response.data) || e);
