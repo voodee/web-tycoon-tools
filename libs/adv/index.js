@@ -26,13 +26,32 @@ module.exports = async (logger, { userAgent }) => {
   };
 
   while (1) {
-    // получаем сайты пользователя
-    config.initData = (await axios.get(
-      `${HOST}users/${config.userId}/init?access_token=${
-        config.token
-      }&connectionId=${config.connectionId}&ts=${config.ts}`,
-      { headers: config.headers }
-    )).data;
+    const page = await browser.newPage();
+
+    page.on("response", async response => {
+      const url = response.url();
+      if (url.includes("init")) {
+        // получаем сайты пользователя
+        config.initData = await response.json();
+      }
+    });
+
+    const width = 1196;
+    const height = 820;
+    await page.emulate({
+      userAgent,
+      viewport: {
+        width,
+        height
+      }
+    });
+
+    await page.goto(
+      `https://game.web-tycoon.com/players/${config.userId}/sites`,
+      {
+        waitUntil: "networkidle2"
+      }
+    );
 
     try {
       // поиск рекламы
@@ -97,6 +116,8 @@ module.exports = async (logger, { userAgent }) => {
         };
       }
     }
+
+    await page.close();
     // каждые 30 сек
     await new Promise(res => setTimeout(res, 30 * 1000));
   }

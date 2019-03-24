@@ -21,6 +21,25 @@ module.exports = async (logger, { userAgent }) => {
   };
 
   while (1) {
+    const page = await browser.newPage();
+
+    const width = 1196;
+    const height = 820;
+    await page.emulate({
+      userAgent,
+      viewport: {
+        width,
+        height
+      }
+    });
+
+    await page.goto(
+      `https://game.web-tycoon.com/players/${config.userId}/sites`,
+      {
+        waitUntil: "networkidle2"
+      }
+    );
+
     try {
       await vacation(browser, logger, config);
     } catch (e) {
@@ -35,6 +54,8 @@ module.exports = async (logger, { userAgent }) => {
         };
       }
     }
+
+    await page.close();
     // каждые 60 сек
     await new Promise(res => setTimeout(res, 1 * 60 * 1000));
   }

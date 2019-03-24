@@ -45,7 +45,7 @@ module.exports = async (browser, logger, config) => {
   // })();
 
   await page.waitForSelector(".siteCard");
-  await new Promise(res => setTimeout(res, random(1000, 5000)));
+  await new Promise(res => setTimeout(res, random(1, 2000)));
 
   for (let site of initData.sites) {
     try {
@@ -60,7 +60,7 @@ module.exports = async (browser, logger, config) => {
 
       await page.waitForSelector(".aboutWr");
       logger.info(`Перешли на сайт ${site.domain}`);
-      await new Promise(res => setTimeout(res, random(1000, 5000)));
+      await new Promise(res => setTimeout(res, random(1, 2000)));
 
       // Таски
       logger.info(`Управляем тасками на сайте ${site.domain}`);
@@ -79,7 +79,7 @@ module.exports = async (browser, logger, config) => {
           (e.response && e.response.data) || e
         );
       }
-      await new Promise(res => setTimeout(res, random(1000, 5000)));
+      await new Promise(res => setTimeout(res, random(1, 2000)));
 
       logger.info(`Управляем контентом на сайте ${site.domain}`);
       // Контент
@@ -95,7 +95,7 @@ module.exports = async (browser, logger, config) => {
           (e.response && e.response.data) || e
         );
       }
-      await new Promise(res => setTimeout(res, random(1000, 5000)));
+      await new Promise(res => setTimeout(res, random(1, 2000)));
 
       // Публикация
       try {
@@ -113,6 +113,6 @@ module.exports = async (browser, logger, config) => {
   }
 
   await page.close();
-  await new Promise(res => setTimeout(res, 2 * 1000));
+  await new Promise(res => setTimeout(res, 1 * 1000));
   logger.info(`Задача по управлению задачами закончена`);
 };

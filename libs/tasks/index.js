@@ -14,25 +14,29 @@ module.exports = async (logger, { userAgent }) => {
       "--disable-extensions-http-throttling"
     ]
   });
-  const config = {
+  let config = {
     userAgent,
     ...(await auth(browser, { userAgent }))
   };
-  await Promise.all([
-    (async () => {
-      while (1) {
-        try {
-          await make(browser, logger, config);
-        } catch (e) {
-          logger.error(
-            "Ошибка при управление тасками",
-            (e && e.response && e.response.data) || e
-          );
+  await (async () => {
+    while (1) {
+      try {
+        await make(browser, logger, config);
+      } catch (e) {
+        logger.error(
+          "Ошибка при управление тасками",
+          (e && e.response && e.response.data) || e
+        );
+        if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
+          config = {
+            userAgent,
+            ...(await auth(browser, { userAgent }))
+          };
         }
-        // каждые 5 сек
-        await new Promise(res => setTimeout(res, 5 * 1000));
       }
-    })()
-  ]);
+      // каждые 5 сек
+      await new Promise(res => setTimeout(res, 5 * 1000));
+    }
+  })();
   await browser.close();
 };
