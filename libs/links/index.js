@@ -80,7 +80,7 @@ module.exports = async (logger, { userAgent }) => {
             }
           }
           //
-          await new Promise(res => setTimeout(res, 1 * 1000));
+          await new Promise(res => setTimeout(res, 5 * 60 * 1000));
         }
         await browser.close();
       }

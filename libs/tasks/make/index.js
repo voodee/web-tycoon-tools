@@ -49,7 +49,7 @@ module.exports = async (browser, logger, config) => {
 
   for (let site of initData.sites) {
     try {
-      const $linkSites = await page.$(".linkSites");
+      const $linkSites = await page.$(".linkSites  .title");
       await $linkSites.click();
       await page.waitForSelector(".siteCard");
       let $sites = (await page.$$(".siteCard")).reverse();

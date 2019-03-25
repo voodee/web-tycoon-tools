@@ -33,7 +33,7 @@ module.exports = async (page, logger, config) => {
 
       logger.info(`сняли работника с задачи`);
       // низкая империя
-      return true;
+      // return true;
     } else {
       // вычисляем лимиты хостинга
       const hostingLimitSource = await (await (await page.$(
