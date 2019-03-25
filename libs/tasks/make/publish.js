@@ -7,7 +7,7 @@ module.exports = async (page, logger) => {
   if ($buttonUpload) {
     await page.evaluate(el => el.click(), $buttonUpload);
     logger.info("Сайт опубликован");
-    await new Promise(res => setTimeout(res, 1 * 1000));
+    await new Promise(res => setTimeout(res, 200));
   } else {
     logger.info("Публикация не нужна");
   }

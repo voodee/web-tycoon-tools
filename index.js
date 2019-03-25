@@ -5,9 +5,8 @@ require("dotenv").config();
 
 const auth = require("./helpers/auth");
 const tasks = require("./libs/tasks");
-const links = require("./libs/links");
-const adv = require("./libs/adv");
 const workers = require("./libs/workers");
+const spam = require("./libs/spam");
 
 const app = express();
 
@@ -36,9 +35,8 @@ let lastResult = ["..."];
     try {
       await Promise.all([
         tasks(browser, console, config),
-        // links(console, config),
-        // adv(console, config),
         workers(browser, console, config)
+        // spam(console, config)
       ]);
     } catch (e) {
       console.error(`Ой, беда!`, (e && e.response && e.response.data) || e);
