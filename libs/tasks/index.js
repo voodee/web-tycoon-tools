@@ -34,30 +34,13 @@ module.exports = async (browser, logger, config) => {
 
   while (1) {
     try {
-      await make(browser, page, logger, { ...config, initData });
+      await make(page, logger, { ...config, initData });
       await page.reload();
     } catch (e) {
       logger.error(
         "Ошибка при управление тасками",
         (e && e.response && e.response.data) || e
       );
-      try {
-        await page.goto(`https://game.web-tycoon.com/`, {
-          waitUntil: "networkidle2"
-        });
-        await page.waitForSelector(".enterWrapper");
-        config = {
-          ...config,
-          ...(await auth(browser, config))
-        };
-        await page.goto(
-          `https://game.web-tycoon.com/players/${config.userId}/sites`,
-          {
-            waitUntil: "networkidle2"
-          }
-        );
-        await page.waitForSelector(".siteCard");
-      } catch (e) {}
     }
     // каждые 5 сек
     await new Promise(res => setTimeout(res, 5 * 1000));

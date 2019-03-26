@@ -5,13 +5,11 @@ const spam = require("./spam");
 const advClear = require("./adv-clear");
 const advFind = require("./adv-find");
 
-const auth = require("../../../helpers/auth");
-
 const random = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-module.exports = async (browser, page, logger, config) => {
+module.exports = async (page, logger, config) => {
   const {
     token,
     userId,
@@ -145,26 +143,6 @@ module.exports = async (browser, page, logger, config) => {
       await new Promise(res => setTimeout(res, random(1, 200)));
     } catch (e) {
       logger.error(`Ошибка управления сайтом`, e);
-      --siteNumber;
-      try {
-        await page.goto(`https://game.web-tycoon.com/`, {
-          waitUntil: "networkidle2"
-        });
-        await page.waitForSelector(".enterWrapper");
-        config = {
-          ...config,
-          ...(await auth(browser, config))
-        };
-        await page.goto(
-          `https://game.web-tycoon.com/players/${config.userId}/sites`,
-          {
-            waitUntil: "networkidle2"
-          }
-        );
-        await page.waitForSelector(".siteCard");
-      } catch (e) {
-        logger.error(`Пиздец((`, e);
-      }
     }
   }
 
