@@ -5,11 +5,13 @@ const spam = require("./spam");
 const advClear = require("./adv-clear");
 const advFind = require("./adv-find");
 
+const auth = require("../../../helpers/auth");
+
 const random = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-module.exports = async (page, logger, config) => {
+module.exports = async (browser, page, logger, config) => {
   const {
     token,
     userId,
@@ -71,6 +73,7 @@ module.exports = async (page, logger, config) => {
           `Ошибка управления тасками`,
           (e.response && e.response.data) || e
         );
+        throw e;
       }
       await new Promise(res => setTimeout(res, random(1, 200)));
 
@@ -87,6 +90,7 @@ module.exports = async (page, logger, config) => {
           `Ошибка управления контентом`,
           (e.response && e.response.data) || e
         );
+        throw e;
       }
       await new Promise(res => setTimeout(res, random(1, 200)));
 
@@ -99,6 +103,7 @@ module.exports = async (page, logger, config) => {
           `Ошибка управления публикацией`,
           (e.response && e.response.data) || e
         );
+        throw e;
       }
 
       // Спам
@@ -110,6 +115,7 @@ module.exports = async (page, logger, config) => {
           `Ошибка очистки спама на сайте`,
           (e.response && e.response.data) || e
         );
+        throw e;
       }
 
       // Реклама
@@ -121,6 +127,7 @@ module.exports = async (page, logger, config) => {
           `Ошибка очистки рекламы на сайте`,
           (e.response && e.response.data) || e
         );
+        throw e;
       }
 
       // Реклама
@@ -132,12 +139,32 @@ module.exports = async (page, logger, config) => {
           `Ошибка поиска рекламы на сайте`,
           (e.response && e.response.data) || e
         );
-        await page.screenshot({ path: "123.png" });
+        throw e;
       }
 
       await new Promise(res => setTimeout(res, random(1, 200)));
     } catch (e) {
       logger.error(`Ошибка управления сайтом`, e);
+      --siteNumber;
+      try {
+        await page.goto(`https://game.web-tycoon.com/`, {
+          waitUntil: "networkidle2"
+        });
+        await page.waitForSelector(".enterWrapper");
+        config = {
+          ...config,
+          ...(await auth(browser, config))
+        };
+        await page.goto(
+          `https://game.web-tycoon.com/players/${config.userId}/sites`,
+          {
+            waitUntil: "networkidle2"
+          }
+        );
+        await page.waitForSelector(".siteCard");
+      } catch (e) {
+        logger.error(`Пиздец((`, e);
+      }
     }
   }
 

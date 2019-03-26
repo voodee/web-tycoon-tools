@@ -52,7 +52,7 @@ module.exports = async (page, logger, config) => {
     const text = await (await $stat.getProperty("textContent")).jsonValue();
     const adConv = parseFloat(text.replace(",", "."));
     logger.info("Конверсия", adConv);
-    if (adConv < 1.5) {
+    if (adConv < 1.8) {
       await remove(page, $card);
       logger.info(`Удалена реклама с низкой конверсией ${adConv} с сайта`);
       ads.splice(cardNumber, 1);
