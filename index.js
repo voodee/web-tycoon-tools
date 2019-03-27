@@ -24,8 +24,7 @@ let lastResult = ["..."];
         "--disable-background-timer-throttling",
         "--disable-renderer-backgrounding",
         "--override-plugin-power-saver-for-testing=never",
-        "--disable-extensions-http-throttling",
-        "--disable-dev-shm-usage"
+        "--disable-extensions-http-throttling"
       ]
     });
 

@@ -14,7 +14,9 @@ module.exports = async (browser, logger, config) => {
     }
     request.continue();
   });
-
+  page.on("error", error => {
+    console.log("screenshot browser error: ", error);
+  });
   const width = 1196;
   const height = 820;
   await page.emulate({
