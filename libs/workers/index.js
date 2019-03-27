@@ -5,6 +5,16 @@ const vacation = require("./vacation");
 module.exports = async (browser, logger, config) => {
   const page = await browser.newPage();
 
+  await page.setRequestInterception(true);
+  page.on("request", request => {
+    const url = new URL(request.url());
+    if (url.host !== "game.web-tycoon.com") {
+      request.abort();
+      return;
+    }
+    request.continue();
+  });
+
   const width = 1196;
   const height = 820;
   await page.emulate({
