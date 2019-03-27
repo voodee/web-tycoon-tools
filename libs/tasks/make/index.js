@@ -32,6 +32,7 @@ module.exports = async (page, logger, config) => {
   //   }
   // })();
 
+  await page.waitForSelector(".linkSites  .title");
   const $linkSites = await page.$(".linkSites  .title");
   await $linkSites.click();
   await page.waitForSelector(".siteCard");
@@ -39,6 +40,7 @@ module.exports = async (page, logger, config) => {
 
   for (let siteNumber = 0; siteNumber < siteCount; ++siteNumber) {
     try {
+      await page.waitForSelector(".linkSites  .title");
       const $linkSites = await page.$(".linkSites  .title");
       await $linkSites.click();
       await page.waitForSelector(".siteCard");
