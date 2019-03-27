@@ -62,16 +62,15 @@ module.exports = async (page, logger, config) => {
         const tasksStatus = await tasks(page, logger, {
           ...config
         });
-        if (tasksStatus) {
-          logger.info(`низкая империя`);
-          break;
-        }
+        // if (tasksStatus) {
+        //   logger.info(`низкая империя`);
+        //   break;
+        // }
       } catch (e) {
         logger.error(
           `Ошибка управления тасками`,
           (e.response && e.response.data) || e
         );
-        throw e;
       }
       await new Promise(res => setTimeout(res, random(1, 200)));
 
@@ -79,16 +78,15 @@ module.exports = async (page, logger, config) => {
       // Контент
       try {
         const contentStatus = await content(page, logger);
-        if (contentStatus) {
-          logger.info(`низкая империя`);
-          break;
-        }
+        // if (contentStatus) {
+        //   logger.info(`низкая империя`);
+        //   break;
+        // }
       } catch (e) {
         logger.error(
           `Ошибка управления контентом`,
           (e.response && e.response.data) || e
         );
-        throw e;
       }
       await new Promise(res => setTimeout(res, random(1, 200)));
 
@@ -101,7 +99,6 @@ module.exports = async (page, logger, config) => {
           `Ошибка управления публикацией`,
           (e.response && e.response.data) || e
         );
-        throw e;
       }
 
       // Спам
@@ -113,7 +110,6 @@ module.exports = async (page, logger, config) => {
           `Ошибка очистки спама на сайте`,
           (e.response && e.response.data) || e
         );
-        throw e;
       }
 
       // Реклама
@@ -125,7 +121,6 @@ module.exports = async (page, logger, config) => {
           `Ошибка очистки рекламы на сайте`,
           (e.response && e.response.data) || e
         );
-        throw e;
       }
 
       // Реклама
@@ -137,7 +132,6 @@ module.exports = async (page, logger, config) => {
           `Ошибка поиска рекламы на сайте`,
           (e.response && e.response.data) || e
         );
-        throw e;
       }
 
       await new Promise(res => setTimeout(res, random(1, 200)));
