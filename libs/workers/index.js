@@ -5,14 +5,36 @@ const vacation = require("./vacation");
 module.exports = async (browser, logger, config) => {
   const page = await browser.newPage();
 
+  let isPause = false;
+
   await page.setRequestInterception(true);
-  page.on("request", request => {
+  page.on("request", async request => {
     const url = new URL(request.url());
     if (url.host !== "game.web-tycoon.com") {
       request.abort();
       return;
     }
+    if (isPause) {
+      request.abort();
+      return;
+    }
     request.continue();
+  });
+  page.on("response", async response => {
+    const status = response.status();
+    if (status > 400 && !isPause) {
+      isPause = true;
+      logger.error("Разлогинило(");
+      try {
+        config = {
+          ...config,
+          ...(await auth(browser, config))
+        };
+      } catch (e) {}
+      isPause = false;
+      await page.goBack();
+      await page.waitForSelector(".siteCard");
+    }
   });
 
   const width = 1196;
