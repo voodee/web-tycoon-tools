@@ -43,5 +43,5 @@
 1. создайте приложение `heroku create`
 2. задайте ваш логин и пароль от игры `heroku config:set login=*ваша_почта* password=*ваш_пароль*`
 3. укажите тип приложения `heroku buildpacks:set heroku/nodejs`
-4. добавляем плагин для heroku `heroku buildpacks:add https://github.com/jontewks/puppeteer-heroku-buildpack`
+4. добавляем плагин для heroku `heroku buildpacks:set jontewks/puppeteer`
 5. деплой кода `git push heroku master`
