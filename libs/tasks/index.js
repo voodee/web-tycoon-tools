@@ -5,23 +5,35 @@ const make = require("./make");
 module.exports = async (browser, logger, config) => {
   const page = await browser.newPage();
 
+  let isPause = false;
+
   await page.setRequestInterception(true);
-  page.on("request", request => {
+  page.on("request", async request => {
     const url = new URL(request.url());
     if (url.host !== "game.web-tycoon.com") {
       request.abort();
       return;
+    }
+    // while (isPause) {
+    //   await new Promise(res => setTimeout(res, 1 * 1000));
+    // }
+    if (isPause) {
+      request.abort();
     }
     request.continue();
   });
   page.on("response", async response => {
     const status = response.status();
     if (status > 400) {
+      isPause = true;
       logger.error("Разлогинило(");
-      config = {
-        ...config,
-        ...(await auth(browser, config))
-      };
+      try {
+        config = {
+          ...config,
+          ...(await auth(browser, config))
+        };
+      } catch (e) {}
+      isPause = false;
       await page.goto(
         `https://game.web-tycoon.com/players/${config.userId}/sites`,
         {

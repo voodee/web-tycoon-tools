@@ -4,6 +4,7 @@ const publish = require("./publish");
 const spam = require("./spam");
 const advClear = require("./adv-clear");
 const advFind = require("./adv-find");
+const pay = require("./pay");
 
 const random = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -40,8 +41,9 @@ module.exports = async (page, logger, config) => {
 
   for (let siteNumber = 0; siteNumber < siteCount; ++siteNumber) {
     try {
-      await page.waitForSelector(".linkSites  .title");
-      const $linkSites = await page.$(".linkSites  .title");
+      await page.waitForSelector(".linkSites .title");
+      await new Promise(res => setTimeout(res, 1000));
+      const $linkSites = await page.$(".linkSites .title");
       await $linkSites.click();
       await page.waitForSelector(".siteCard");
       await new Promise(res => setTimeout(res, 1000));
@@ -137,11 +139,22 @@ module.exports = async (page, logger, config) => {
         );
       }
 
+      // Оплата домена и хостинга
+      try {
+        logger.info(`Оплата хостинга и домена на сайте ${siteName}`);
+        await pay(page, logger, { ...config, siteNumber });
+      } catch (e) {
+        logger.error(
+          `Ошибка оплаты хостинга и домена`,
+          (e.response && e.response.data) || e
+        );
+      }
+
       await new Promise(res => setTimeout(res, random(1, 200)));
     } catch (e) {
       logger.error(`Ошибка управления сайтом`, e);
     }
-    if (siteNumber % 10 === 0) await page.reload();
+    if ((siteNumber + 1) % 5 === 0) await page.reload();
   }
 
   logger.info(`Задача по управлению задачами закончена`);
