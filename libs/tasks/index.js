@@ -19,12 +19,13 @@ module.exports = async (browser, logger, config) => {
     // }
     if (isPause) {
       request.abort();
+      return;
     }
     request.continue();
   });
   page.on("response", async response => {
     const status = response.status();
-    if (status > 400) {
+    if (status > 400 && !isPause) {
       isPause = true;
       logger.error("Разлогинило(");
       try {
@@ -34,12 +35,13 @@ module.exports = async (browser, logger, config) => {
         };
       } catch (e) {}
       isPause = false;
-      await page.goto(
-        `https://game.web-tycoon.com/players/${config.userId}/sites`,
-        {
-          waitUntil: "networkidle2"
-        }
-      );
+      // await page.goto(
+      //   `https://game.web-tycoon.com/players/${config.userId}/sites`,
+      //   {
+      //     waitUntil: "networkidle2"
+      //   }
+      // );
+      await page.goBack();
       await page.waitForSelector(".siteCard");
     }
   });
@@ -61,7 +63,9 @@ module.exports = async (browser, logger, config) => {
     const url = response.url();
     if (url.includes("init")) {
       // получаем сайты пользователя
-      initData = await response.json();
+      try {
+        initData = await response.json();
+      } catch (e) {}
     }
   });
 
