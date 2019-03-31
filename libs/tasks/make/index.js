@@ -33,32 +33,36 @@ module.exports = async (page, logger, config) => {
   //   }
   // })();
 
+  // переходим на страницу сайтов
   await page.waitForSelector(".linkSites  .title");
+  await new Promise(res => setTimeout(res, 1000));
   const $linkSites = await page.$(".linkSites  .title");
   await $linkSites.click();
-  await page.waitForSelector(".siteCard");
-  const siteCount = (await page.$$(".siteCard")).length;
 
-  for (let siteNumber = 0; siteNumber < siteCount; ++siteNumber) {
+  // // считаем количество сайтов
+  // const siteCount = (await page.$$(".siteCard")).length;
+
+  // переходим на последний сайт
+  await page.waitForSelector(".siteCard");
+  await new Promise(res => setTimeout(res, 1000));
+  let $sites = await page.$$(".siteCard");
+  await $sites[0].click();
+
+  let siteNumber = 0;
+  while (1) {
     try {
-      await page.waitForSelector(".linkSites .title");
-      await new Promise(res => setTimeout(res, 1000));
-      const $linkSites = await page.$(".linkSites .title");
-      await $linkSites.click();
-      await page.waitForSelector(".siteCard");
-      await new Promise(res => setTimeout(res, 1000));
-      let $sites = (await page.$$(".siteCard")).reverse();
-      const $site = $sites[siteNumber];
-      const $siteName = await $site.$(".name");
+      ++siteNumber;
+      await new Promise(res => setTimeout(res, 500));
+      await page.waitForSelector(".prevNextNavGroup .leftArrow");
+      await new Promise(res => setTimeout(res, 500));
+      await (await page.$(".prevNextNavGroup .leftArrow")).click();
+
+      const $siteName = await page.$(".subNavLeftGroup span:last-child");
       const siteName = await (await $siteName.getProperty(
         "textContent"
       )).jsonValue();
-      logger.info(`Открываем сайт ${siteName}`);
-
-      await $site.click();
-
-      await page.waitForSelector(".aboutWr");
       logger.info(`Перешли на сайт ${siteName}`);
+
       await new Promise(res => setTimeout(res, random(1, 200)));
 
       // Таски
@@ -142,7 +146,7 @@ module.exports = async (page, logger, config) => {
       // Оплата домена и хостинга
       try {
         logger.info(`Оплата хостинга и домена на сайте ${siteName}`);
-        await pay(page, logger, { ...config, siteNumber });
+        await pay(page, logger);
       } catch (e) {
         logger.error(
           `Ошибка оплаты хостинга и домена`,
@@ -154,7 +158,7 @@ module.exports = async (page, logger, config) => {
     } catch (e) {
       logger.error(`Ошибка управления сайтом`, e);
     }
-    if ((siteNumber + 1) % 5 === 0) await page.reload();
+    if ((siteNumber + 1) % 40 === 0) await page.reload();
   }
 
   logger.info(`Задача по управлению задачами закончена`);
