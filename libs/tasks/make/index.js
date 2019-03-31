@@ -141,7 +141,7 @@ module.exports = async (page, logger, config) => {
     } catch (e) {
       logger.error(`Ошибка управления сайтом`, e);
     }
-    if ((siteNumber + 1) % 20 === 0) await page.reload();
+    if (siteNumber % 10 === 0) await page.reload();
   }
 
   logger.info(`Задача по управлению задачами закончена`);
