@@ -12,11 +12,11 @@ const app = express();
 
 let lastResult = ["..."];
 
-const addLog = (type, text) => {
-  console[type](text);
+const addLog = (type, ...args) => {
+  console[type](...args);
 
   lastResult.push(
-    `[${new Date(Date.now()).toLocaleString()}] ${type}: ${text}`
+    `[${new Date(Date.now()).toLocaleString()}] ${type}: ${args}`
   );
   if (lastResult.length > 200) {
     lastResult.shift();
