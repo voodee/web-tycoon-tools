@@ -41,7 +41,9 @@ module.exports = async (browser, logger, config) => {
       //     waitUntil: "networkidle2"
       //   }
       // );
-      await page.goBack();
+      while (!/.+\/players\/.+\/sites\/.+/.test(page.url())) {
+        await page.goBack();
+      }
       await page.waitForSelector(".siteCard");
     }
   });
