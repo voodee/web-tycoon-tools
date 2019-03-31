@@ -31,7 +31,7 @@ module.exports = async (page, $task, logger) => {
   await page.evaluate(el => el.click(), $addWorkerButton);
   await page.waitForSelector(".popupPortal");
   // :(
-  await new Promise(res => setTimeout(res, 3 * 1000));
+  await new Promise(res => setTimeout(res, 200));
 
   // фильтруем, оставляем только по специальности
   const $cards = await page.$$(".popupPortal .cardContainer:not(.inactive)");
@@ -57,7 +57,7 @@ module.exports = async (page, $task, logger) => {
       (extraEnergy || energyLast > 0.05)
     ) {
       await $card.click();
-      await new Promise(res => setTimeout(res, 2 * 1000));
+      await new Promise(res => setTimeout(res, 200));
       logger.info(`Исполнитель ${skill} поставлен на задачу`);
       return;
     }
@@ -66,5 +66,5 @@ module.exports = async (page, $task, logger) => {
   const $modalClose = await page.$(".modalClose");
   // await page.evaluate(el => el.click(), $modalClose);
   await $modalClose.click();
-  await new Promise(res => setTimeout(res, 2 * 1000));
+  await new Promise(res => setTimeout(res, 200));
 };

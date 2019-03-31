@@ -2,41 +2,78 @@ const puppeteer = require("puppeteer");
 const auth = require("../../helpers/auth");
 const make = require("./make");
 
-module.exports = async (logger, { userAgent }) => {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-background-timer-throttling",
-      "--disable-renderer-backgrounding",
-      "--override-plugin-power-saver-for-testing=never",
-      "--disable-extensions-http-throttling"
-    ]
-  });
-  let config = {
-    userAgent,
-    ...(await auth(browser, { userAgent }))
-  };
-  await (async () => {
-    while (1) {
-      try {
-        await make(browser, logger, config);
-      } catch (e) {
-        logger.error(
-          "Ошибка при управление тасками",
-          (e && e.response && e.response.data) || e
-        );
-        if (e.error && e.error.code === "AUTHORIZATION_REQUIRED") {
-          config = {
-            userAgent,
-            ...(await auth(browser, { userAgent }))
-          };
-        }
-      }
-      // каждые 5 сек
-      await new Promise(res => setTimeout(res, 5 * 1000));
+module.exports = async (browser, logger, config) => {
+  const page = await browser.newPage();
+
+  await page.setRequestInterception(true);
+  page.on("request", request => {
+    const url = new URL(request.url());
+    if (url.host !== "game.web-tycoon.com") {
+      request.abort();
+      return;
     }
-  })();
-  await browser.close();
+    request.continue();
+  });
+  page.on("response", async response => {
+    const status = response.status();
+    if (status > 400) {
+      logger.error("Разлогинило(");
+      config = {
+        ...config,
+        ...(await auth(browser, config))
+      };
+      await page.goto(
+        `https://game.web-tycoon.com/players/${config.userId}/sites`,
+        {
+          waitUntil: "networkidle2"
+        }
+      );
+      await page.waitForSelector(".siteCard");
+    }
+  });
+  page.on("error", error => {
+    console.log("screenshot browser error: ", error);
+  });
+  const width = 1196;
+  const height = 820;
+  await page.emulate({
+    userAgent: config.userAgent,
+    viewport: {
+      width,
+      height
+    }
+  });
+
+  let initData;
+  page.on("response", async response => {
+    const url = response.url();
+    if (url.includes("init")) {
+      // получаем сайты пользователя
+      initData = await response.json();
+    }
+  });
+
+  await page.goto(
+    `https://game.web-tycoon.com/players/${config.userId}/sites`,
+    {
+      waitUntil: "networkidle2"
+    }
+  );
+  await page.waitForSelector(".siteCard");
+
+  while (1) {
+    try {
+      await make(page, logger, { ...config, initData });
+      await page.reload();
+    } catch (e) {
+      logger.error(
+        "Ошибка при управление тасками",
+        (e && e.response && e.response.data) || e
+      );
+    }
+    // каждые 5 сек
+    await new Promise(res => setTimeout(res, 5 * 1000));
+  }
+
+  await page.close();
 };

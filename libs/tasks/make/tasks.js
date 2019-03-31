@@ -29,11 +29,11 @@ module.exports = async (page, logger, config) => {
       // );
 
       await $cancelTaskButton.click();
-      await new Promise(res => setTimeout(res, 1 * 1000));
+      await new Promise(res => setTimeout(res, 200));
 
       logger.info(`сняли работника с задачи`);
       // низкая империя
-      return true;
+      // return true;
     } else {
       // вычисляем лимиты хостинга
       const hostingLimitSource = await (await (await page.$(

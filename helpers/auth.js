@@ -2,6 +2,8 @@ module.exports = async (browser, { userAgent }) => {
   const config = {};
   const page = await browser.newPage();
 
+  await page.setRequestInterception(true);
+
   const width = 1196;
   const height = 820;
   await page.emulate({
@@ -20,6 +22,11 @@ module.exports = async (browser, { userAgent }) => {
       config.connectionId = urlParsed.searchParams.get("connectionId");
       config.ts = urlParsed.searchParams.get("ts");
       config.headers = request.headers();
+    }
+
+    if (new URL(request.url()).host !== "game.web-tycoon.com") {
+      request.abort();
+      return;
     }
     request.continue();
   });

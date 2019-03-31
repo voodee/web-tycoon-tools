@@ -69,7 +69,7 @@ module.exports = async (
         e.response.data.error
       );
     }
-    await new Promise(res => setTimeout(res, 30 * 1000));
+    await new Promise(res => setTimeout(res, 3 * 60 * 1000));
   }
   logger.info("Спам закончился");
 };

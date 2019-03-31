@@ -1,12 +1,15 @@
 const tasks = require("./tasks");
 const content = require("./content");
 const publish = require("./publish");
+const spam = require("./spam");
+const advClear = require("./adv-clear");
+const advFind = require("./adv-find");
 
 const random = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-module.exports = async (browser, logger, config) => {
+module.exports = async (page, logger, config) => {
   const {
     token,
     userId,
@@ -17,21 +20,6 @@ module.exports = async (browser, logger, config) => {
     userAgent
   } = config;
   logger.info(`Задача по управлению задачами начата`);
-  const page = await browser.newPage();
-
-  const width = 1196;
-  const height = 820;
-  await page.emulate({
-    userAgent,
-    viewport: {
-      width,
-      height
-    }
-  });
-
-  await page.goto(`https://game.web-tycoon.com/players/${userId}/sites`, {
-    waitUntil: "networkidle2"
-  });
 
   // Двигаем курсором, чтобы нас не заподозрили
   // (async () => {
@@ -44,62 +32,70 @@ module.exports = async (browser, logger, config) => {
   //   }
   // })();
 
+  await page.waitForSelector(".linkSites  .title");
+  const $linkSites = await page.$(".linkSites  .title");
+  await $linkSites.click();
   await page.waitForSelector(".siteCard");
-  await new Promise(res => setTimeout(res, random(1, 2000)));
+  const siteCount = (await page.$$(".siteCard")).length;
 
-  for (let site of initData.sites) {
+  for (let siteNumber = 0; siteNumber < siteCount; ++siteNumber) {
     try {
-      const $linkSites = await page.$(".linkSites");
+      await page.waitForSelector(".linkSites  .title");
+      const $linkSites = await page.$(".linkSites  .title");
       await $linkSites.click();
       await page.waitForSelector(".siteCard");
+      await new Promise(res => setTimeout(res, 1000));
       let $sites = (await page.$$(".siteCard")).reverse();
-      logger.info(`Открываем сайт ${site.domain}`);
-      const siteNumber = initData.sites.indexOf(site);
+      const $site = $sites[siteNumber];
+      const $siteName = await $site.$(".name");
+      const siteName = await (await $siteName.getProperty(
+        "textContent"
+      )).jsonValue();
+      logger.info(`Открываем сайт ${siteName}`);
 
-      await $sites[siteNumber].click();
+      await $site.click();
 
       await page.waitForSelector(".aboutWr");
-      logger.info(`Перешли на сайт ${site.domain}`);
-      await new Promise(res => setTimeout(res, random(1, 2000)));
+      logger.info(`Перешли на сайт ${siteName}`);
+      await new Promise(res => setTimeout(res, random(1, 200)));
 
       // Таски
-      logger.info(`Управляем тасками на сайте ${site.domain}`);
+      logger.info(`Управляем тасками на сайте ${siteName}`);
       try {
         const tasksStatus = await tasks(page, logger, {
-          siteId: site.id,
           ...config
         });
-        if (tasksStatus) {
-          logger.info(`низкая империя`);
-          break;
-        }
+        // if (tasksStatus) {
+        //   logger.info(`низкая империя`);
+        //   break;
+        // }
       } catch (e) {
         logger.error(
           `Ошибка управления тасками`,
           (e.response && e.response.data) || e
         );
       }
-      await new Promise(res => setTimeout(res, random(1, 2000)));
+      await new Promise(res => setTimeout(res, random(1, 200)));
 
-      logger.info(`Управляем контентом на сайте ${site.domain}`);
+      logger.info(`Управляем контентом на сайте ${siteName}`);
       // Контент
       try {
         const contentStatus = await content(page, logger);
-        if (contentStatus) {
-          logger.info(`низкая империя`);
-          break;
-        }
+        // if (contentStatus) {
+        //   logger.info(`низкая империя`);
+        //   break;
+        // }
       } catch (e) {
         logger.error(
           `Ошибка управления контентом`,
           (e.response && e.response.data) || e
         );
       }
-      await new Promise(res => setTimeout(res, random(1, 2000)));
+      await new Promise(res => setTimeout(res, random(1, 200)));
 
       // Публикация
       try {
-        logger.info(`Управляем публикацией на сайте ${site.domain}`);
+        logger.info(`Управляем публикацией на сайте ${siteName}`);
         await publish(page, logger);
       } catch (e) {
         logger.error(
@@ -107,12 +103,46 @@ module.exports = async (browser, logger, config) => {
           (e.response && e.response.data) || e
         );
       }
+
+      // Спам
+      try {
+        logger.info(`Очистка спама на сайте ${siteName}`);
+        await spam(page, logger, config);
+      } catch (e) {
+        logger.error(
+          `Ошибка очистки спама на сайте`,
+          (e.response && e.response.data) || e
+        );
+      }
+
+      // Реклама
+      try {
+        logger.info(`Очистка рекламы на сайте ${siteName}`);
+        await advClear(page, logger, { ...config, siteNumber });
+      } catch (e) {
+        logger.error(
+          `Ошибка очистки рекламы на сайте`,
+          (e.response && e.response.data) || e
+        );
+      }
+
+      // Реклама
+      try {
+        logger.info(`Поиск рекламы на сайте ${siteName}`);
+        await advFind(page, logger, { ...config, siteNumber });
+      } catch (e) {
+        logger.error(
+          `Ошибка поиска рекламы на сайте`,
+          (e.response && e.response.data) || e
+        );
+      }
+
+      await new Promise(res => setTimeout(res, random(1, 200)));
     } catch (e) {
       logger.error(`Ошибка управления сайтом`, e);
     }
+    if ((siteNumber + 1) % 20 === 0) await page.reload();
   }
 
-  await page.close();
-  await new Promise(res => setTimeout(res, 1 * 1000));
   logger.info(`Задача по управлению задачами закончена`);
 };
