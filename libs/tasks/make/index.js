@@ -44,6 +44,7 @@ module.exports = async (page, logger, config) => {
       const $linkSites = await page.$(".linkSites  .title");
       await $linkSites.click();
       await page.waitForSelector(".siteCard");
+      await new Promise(res => setTimeout(res, 1000));
       let $sites = (await page.$$(".siteCard")).reverse();
       const $site = $sites[siteNumber];
       const $siteName = await $site.$(".name");

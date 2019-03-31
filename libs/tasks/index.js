@@ -14,6 +14,23 @@ module.exports = async (browser, logger, config) => {
     }
     request.continue();
   });
+  page.on("response", async response => {
+    const status = response.status();
+    if (status > 400) {
+      logger.error("Разлогинило(");
+      config = {
+        ...config,
+        ...(await auth(browser, config))
+      };
+      await page.goto(
+        `https://game.web-tycoon.com/players/${config.userId}/sites`,
+        {
+          waitUntil: "networkidle2"
+        }
+      );
+      await page.waitForSelector(".siteCard");
+    }
+  });
   page.on("error", error => {
     console.log("screenshot browser error: ", error);
   });
