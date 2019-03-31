@@ -47,13 +47,15 @@ module.exports = async (browser, logger, config) => {
     }
   });
 
-  await page.goto(
-    `https://game.web-tycoon.com/players/${config.userId}/workers`,
-    {
-      waitUntil: "networkidle2"
-    }
-  );
-  await page.waitForSelector(".grid");
+  try {
+    await page.goto(
+      `https://game.web-tycoon.com/players/${config.userId}/workers`,
+      {
+        waitUntil: "networkidle2"
+      }
+    );
+    await page.waitForSelector(".grid");
+  } catch (e) {}
 
   while (1) {
     try {
