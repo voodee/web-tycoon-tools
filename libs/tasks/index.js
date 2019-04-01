@@ -38,7 +38,7 @@ module.exports = async (browser, logger, config) => {
       try {
         await page.waitForNavigation();
         const url = page.url();
-        if (!/.+\/players\/.+\/sites\/.+/.test(url)) {
+        if (/.+\/players\/.+\/sites\/.+/.test(url)) {
           siteIdLast = url.split("/").pop();
         }
         if (url === "https://game.web-tycoon.com/") {
