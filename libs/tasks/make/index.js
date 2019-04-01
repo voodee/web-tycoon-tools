@@ -47,6 +47,7 @@ module.exports = async (page, logger, config) => {
   await new Promise(res => setTimeout(res, 1000));
   let $sites = await page.$$(".siteCard");
   await $sites[0].click();
+  await page.waitForSelector(".prevNextNavGroup .leftArrow");
 
   let siteNumber = 0;
   while (1) {
