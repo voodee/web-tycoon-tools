@@ -60,6 +60,7 @@ module.exports = async (browser, logger, config) => {
   while (1) {
     try {
       await vacation(page, logger, config);
+      await page.reload();
     } catch (e) {
       logger.error(
         "Ошибка при управление работниками",

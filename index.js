@@ -50,6 +50,21 @@ const logger = {
       ...config,
       ...(await auth(browser, config))
     };
+
+    setInterval(async () => {
+      const pages = await browser.pages();
+      for (const p of pages) {
+        const metrics = await p.metrics();
+        const title = await p.title();
+        logger.log(
+          "== Memory ==",
+          title,
+          p.url(),
+          metrics.JSHeapUsedSize / 1024 / 1024
+        );
+      }
+    }, 1 * 60 * 1000);
+
     try {
       await Promise.all([
         tasks(browser, logger, config),
