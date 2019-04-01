@@ -33,22 +33,6 @@ module.exports = async (page, logger, config) => {
   //   }
   // })();
 
-  // переходим на страницу сайтов
-  await page.waitForSelector(".linkSites  .title");
-  await new Promise(res => setTimeout(res, 1000));
-  const $linkSites = await page.$(".linkSites  .title");
-  await $linkSites.click();
-
-  // // считаем количество сайтов
-  // const siteCount = (await page.$$(".siteCard")).length;
-
-  // переходим на последний сайт
-  await page.waitForSelector(".siteCard");
-  await new Promise(res => setTimeout(res, 1000));
-  let $sites = await page.$$(".siteCard");
-  await $sites[0].click();
-  await page.waitForSelector(".prevNextNavGroup .leftArrow");
-
   let siteNumber = 0;
   while (1) {
     try {

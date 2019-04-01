@@ -2,11 +2,76 @@ const puppeteer = require("puppeteer");
 const auth = require("../../helpers/auth");
 const make = require("./make");
 
+const goToLastSite = async (page, config) => {
+  await page.goto(
+    `https://game.web-tycoon.com/players/${config.userId}/sites`,
+    {
+      waitUntil: "networkidle2"
+    }
+  );
+  await page.waitForSelector(".siteCard");
+
+  // переходим на страницу сайтов
+  await page.waitForSelector(".linkSites  .title");
+  await new Promise(res => setTimeout(res, 1000));
+  const $linkSites = await page.$(".linkSites  .title");
+  await $linkSites.click();
+
+  // // считаем количество сайтов
+  // const siteCount = (await page.$$(".siteCard")).length;
+
+  // переходим на последний сайт
+  await page.waitForSelector(".siteCard");
+  await new Promise(res => setTimeout(res, 1000));
+  let $sites = await page.$$(".siteCard");
+  await $sites[0].click();
+  await page.waitForSelector(".prevNextNavGroup .leftArrow");
+};
+
 module.exports = async (browser, logger, config) => {
   const page = await browser.newPage();
 
-  let isPause = false;
+  // Автологин начало
+  let siteIdLast;
+  (async () => {
+    while (1) {
+      try {
+        await page.waitForNavigation();
+        const url = page.url();
+        if (!/.+\/players\/.+\/sites\/.+/.test(url)) {
+          siteIdLast = url.split("/").pop();
+        }
+        if (url === "https://game.web-tycoon.com/") {
+          logger.error("Разлогинило(");
+          try {
+            config = {
+              ...config,
+              ...(await auth(browser, config))
+            };
+          } catch (e) {}
+          (async () => {
+            if (!siteIdLast) {
+              await goToLastSite(page, config);
+              return;
+            }
 
+            await page.goto(
+              `https://game.web-tycoon.com/players/${
+                config.userId
+              }/sites/${siteIdLast}`,
+              {
+                waitUntil: "networkidle2"
+              }
+            );
+            await page.waitForSelector(".siteCard");
+          })();
+        }
+      } catch (e) {}
+    }
+  })();
+  // Автологин конец
+
+  let isPause = false;
   await page.setRequestInterception(true);
   page.on("request", async request => {
     const url = new URL(request.url());
@@ -14,42 +79,9 @@ module.exports = async (browser, logger, config) => {
       request.abort();
       return;
     }
-    // while (isPause) {
-    //   await new Promise(res => setTimeout(res, 1 * 1000));
-    // }
-    if (isPause) {
-      request.abort();
-      return;
-    }
     request.continue();
   });
-  page.on("response", async response => {
-    const status = response.status();
-    if (status > 400 && !isPause) {
-      isPause = true;
-      logger.error("Разлогинило(");
-      try {
-        config = {
-          ...config,
-          ...(await auth(browser, config))
-        };
-      } catch (e) {}
-      isPause = false;
-      // await page.goto(
-      //   `https://game.web-tycoon.com/players/${config.userId}/sites`,
-      //   {
-      //     waitUntil: "networkidle2"
-      //   }
-      // );
-      while (!/.+\/players\/.+\/sites\/.+/.test(page.url())) {
-        await page.goBack();
-      }
-      await page.waitForSelector(".siteCard");
-    }
-  });
-  page.on("error", error => {
-    console.log("screenshot browser error: ", error);
-  });
+
   const width = 1196;
   const height = 820;
   await page.emulate({
@@ -71,13 +103,7 @@ module.exports = async (browser, logger, config) => {
     }
   });
 
-  await page.goto(
-    `https://game.web-tycoon.com/players/${config.userId}/sites`,
-    {
-      waitUntil: "networkidle2"
-    }
-  );
-  await page.waitForSelector(".siteCard");
+  await goToLastSite(page, config);
 
   while (1) {
     try {

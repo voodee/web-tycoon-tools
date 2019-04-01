@@ -5,8 +5,6 @@ const vacation = require("./vacation");
 module.exports = async (browser, logger, config) => {
   const page = await browser.newPage();
 
-  let isPause = false;
-
   await page.setRequestInterception(true);
   page.on("request", async request => {
     const url = new URL(request.url());
@@ -14,27 +12,7 @@ module.exports = async (browser, logger, config) => {
       request.abort();
       return;
     }
-    if (isPause) {
-      request.abort();
-      return;
-    }
     request.continue();
-  });
-  page.on("response", async response => {
-    const status = response.status();
-    if (status > 400 && !isPause) {
-      isPause = true;
-      logger.error("Разлогинило(");
-      try {
-        config = {
-          ...config,
-          ...(await auth(browser, config))
-        };
-      } catch (e) {}
-      isPause = false;
-      await page.goBack();
-      await page.waitForSelector(".siteCard");
-    }
   });
 
   const width = 1196;
@@ -47,18 +25,15 @@ module.exports = async (browser, logger, config) => {
     }
   });
 
-  try {
-    await page.goto(
-      `https://game.web-tycoon.com/players/${config.userId}/workers`,
-      {
-        waitUntil: "networkidle2"
-      }
-    );
-    await page.waitForSelector(".grid");
-  } catch (e) {}
-
   while (1) {
     try {
+      await page.goto(
+        `https://game.web-tycoon.com/players/${config.userId}/workers`,
+        {
+          waitUntil: "networkidle2"
+        }
+      );
+      await page.waitForSelector(".grid");
       await vacation(page, logger, config);
       await page.reload();
     } catch (e) {

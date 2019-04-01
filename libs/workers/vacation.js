@@ -13,7 +13,7 @@ module.exports = async (
   logger,
   { token, userId, headers, connectionId, ts, initData, userAgent }
 ) => {
-  logger.info(`Задача по отправке работников в отпуск начата`);
+  logger.info(`Задача по управлению работниками начата`);
 
   const $linkWorkers = await page.$(".linkWorkers .title");
   await $linkWorkers.click();
@@ -33,6 +33,18 @@ module.exports = async (
 
       await $worker.click();
       await page.waitForSelector(".infoBlock");
+
+      for ($button of await page.$$(
+        "footer button.cardBottom:not(.buttonDisabled)"
+      )) {
+        const text = await (await $button.getProperty(
+          "textContent"
+        )).jsonValue();
+        if (/Заплатить/gi.test(text)) {
+          await $button.click();
+          logger.info(`Заплатили работнику ${workerNumber}`);
+        }
+      }
 
       const isWork = (await page.$$(".workingStatus.profile")).length > 0;
       if (isWork) {
@@ -58,17 +70,15 @@ module.exports = async (
         continue;
       }
 
-      const $buttons = await page.$$("footer button.cardBottom");
-      for ($button of $buttons) {
+      for ($button of await page.$$("footer button.cardBottom")) {
         const text = await (await $button.getProperty(
           "textContent"
         )).jsonValue();
         if (/отдох/gi.test(text)) {
           await $button.click();
+          logger.info(`Работник ${workerNumber} отправлен в отпуск`);
         }
       }
-
-      logger.info(`Работник ${workerNumber} отправлен в отпуск`);
     } catch (e) {
       logger.error(`Ошибка при управление работником ${workerNumber}`, e);
     }
