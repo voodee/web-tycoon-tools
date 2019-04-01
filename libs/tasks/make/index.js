@@ -166,6 +166,19 @@ module.exports = async (page, logger, config) => {
     } catch (e) {
       logger.error(`Ошибка управления сайтом`, page.url(), e);
     }
+    const browser = await page.browser();
+    const pages = await browser.pages();
+    for (const p of pages) {
+      const metrics = await p.metrics();
+      const title = await p.title();
+      logger.log(
+        "== Memory ==",
+        title,
+        p.url(),
+        metrics.JSHeapUsedSize / 1024 / 1024
+      );
+    }
+
     if ((siteNumber + 1) % 20 === 0) await page.reload();
   }
 
