@@ -78,6 +78,7 @@ module.exports = async (page, logger, config) => {
       } catch (e) {
         logger.error(
           `Ошибка управления тасками`,
+          page.url(),
           (e.response && e.response.data) || e
         );
       }
@@ -94,6 +95,7 @@ module.exports = async (page, logger, config) => {
       } catch (e) {
         logger.error(
           `Ошибка управления контентом`,
+          page.url(),
           (e.response && e.response.data) || e
         );
       }
@@ -106,6 +108,7 @@ module.exports = async (page, logger, config) => {
       } catch (e) {
         logger.error(
           `Ошибка управления публикацией`,
+          page.url(),
           (e.response && e.response.data) || e
         );
       }
@@ -117,6 +120,7 @@ module.exports = async (page, logger, config) => {
       } catch (e) {
         logger.error(
           `Ошибка очистки спама на сайте`,
+          page.url(),
           (e.response && e.response.data) || e
         );
       }
@@ -128,6 +132,7 @@ module.exports = async (page, logger, config) => {
       } catch (e) {
         logger.error(
           `Ошибка очистки рекламы на сайте`,
+          page.url(),
           (e.response && e.response.data) || e
         );
       }
@@ -139,6 +144,7 @@ module.exports = async (page, logger, config) => {
       } catch (e) {
         logger.error(
           `Ошибка поиска рекламы на сайте`,
+          page.url(),
           (e.response && e.response.data) || e
         );
       }
@@ -150,13 +156,14 @@ module.exports = async (page, logger, config) => {
       } catch (e) {
         logger.error(
           `Ошибка оплаты хостинга и домена`,
+          page.url(),
           (e.response && e.response.data) || e
         );
       }
 
       await new Promise(res => setTimeout(res, random(1, 200)));
     } catch (e) {
-      logger.error(`Ошибка управления сайтом`, e);
+      logger.error(`Ошибка управления сайтом`, page.url(), e);
     }
     if ((siteNumber + 1) % 20 === 0) await page.reload();
   }

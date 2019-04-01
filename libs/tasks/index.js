@@ -86,6 +86,7 @@ module.exports = async (browser, logger, config) => {
     } catch (e) {
       logger.error(
         "Ошибка при управление тасками",
+        page.url(),
         (e && e.response && e.response.data) || e
       );
     }
