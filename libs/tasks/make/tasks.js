@@ -52,11 +52,11 @@ module.exports = async (page, logger, config) => {
         trafSpeed *= 1000;
       }
 
-      const isDdos = await page.$(".effectCard .debuff");
-      if (isDdos) {
-        logger.info("Сайт ДДОСят");
-        continue;
-      }
+      // const isDdos = await page.$(".effectCard .debuff");
+      // if (isDdos) {
+      //   logger.info("Сайт ДДОСят");
+      //   continue;
+      // }
 
       const hostingAllow = trafSpeed / hostingLimit < 0.9;
       if (!hostingAllow) {
