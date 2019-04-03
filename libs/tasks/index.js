@@ -71,6 +71,18 @@ module.exports = async (browser, logger, config) => {
   })();
   // Автологин конец
 
+  // Ежедневная награда начало
+  (async () => {
+    while (1) {
+      const $dailyBonusButton = await page.$(".dailyBonus .baseButton");
+      if ($dailyBonusButton) {
+        await $dailyBonusButton.click();
+      }
+      await new Promise(res => setTimeout(res, 10 * 1000));
+    }
+  })();
+  // Ежедневная награда конец
+
   let isPause = false;
   await page.setRequestInterception(true);
   page.on("request", async request => {
