@@ -74,10 +74,12 @@ module.exports = async (browser, logger, config) => {
   // Ежедневная награда начало
   (async () => {
     while (1) {
-      const $dailyBonusButton = await page.$(".dailyBonus .baseButton");
-      if ($dailyBonusButton) {
-        await $dailyBonusButton.click();
-      }
+      try {
+        const $dailyBonusButton = await page.$(".dailyBonus .baseButton");
+        if ($dailyBonusButton) {
+          await $dailyBonusButton.click();
+        }
+      } catch (e) {}
       await new Promise(res => setTimeout(res, 10 * 1000));
     }
   })();
