@@ -64,7 +64,7 @@ module.exports = async (page, logger) => {
     const text = await (await $stat.getProperty("textContent")).jsonValue();
     const adConv = parseFloat(text.replace(",", "."));
     logger.info("Конверсия", adConv);
-    if (adConv < 1.8) {
+    if (adConv < 2.2) {
       await remove(page, $card);
       logger.info(`Удалена реклама с низкой конверсией ${adConv} с сайта`);
       continue;
