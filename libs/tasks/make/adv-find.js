@@ -42,7 +42,7 @@ module.exports = async (page, logger) => {
   );
 
   // если назойливость маленькая, то ищем мощную рекламу - "Поискать в интернете"
-  if (importunitiesSum < 50 && $offerCards.length > 1) {
+  if (importunitiesSum < 55 && $offerCards.length > 1) {
     await $offerCards[1].click();
     logger.info(`Ищем мощную рекламу для сайта`);
     await new Promise(res => setTimeout(res, 3 * 1000));
