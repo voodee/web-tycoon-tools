@@ -72,6 +72,7 @@ module.exports = async (page, logger) => {
       importunities1 * 12 + importunities2 * 41 + importunities3 * 100;
 
     logger.info("Конверсия", adConv);
+    logger.info("Минимальная конверсия", 270.0 / importunitiesSum);
     if (adConv < 270.0 / importunitiesSum) {
       await remove(page, $card);
       logger.info(`Удалена реклама с низкой конверсией ${adConv} с сайта`);
