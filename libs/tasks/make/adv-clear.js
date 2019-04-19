@@ -68,12 +68,23 @@ module.exports = async (page, logger) => {
     const importunities1 = (await page.$$(".round-1")).length / 3;
     const importunities2 = (await page.$$(".round-2")).length / 3;
     const importunities3 = (await page.$$(".round-3")).length / 3;
-
     const importunitiesSum =
       importunities1 * 12 + importunities2 * 41 + importunities3 * 100;
 
+    const cardImportunities1 = (await $card.$$(".round-1")).length / 3;
+    const cardImportunities2 = (await $card.$$(".round-2")).length / 3;
+    const cardImportunities3 = (await $card.$$(".round-3")).length / 3;
+
     logger.info("Конверсия", adConv);
-    const minConv = Math.min(260.0 / Math.max(importunitiesSum, 124), 3.1);
+    const confDown =
+      cardImportunities1 * 50 +
+      cardImportunities2 * 20 +
+      cardImportunities3 * 0;
+    logger.info("Коэфициэент понижения", confDown);
+    const minConv = Math.min(
+      (270.0 - confDown) / Math.max(importunitiesSum, 124),
+      3.1
+    );
     logger.info("Минимальная конверсия", minConv);
     if (adConv < minConv) {
       await remove(page, $card);
