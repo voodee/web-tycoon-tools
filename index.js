@@ -30,7 +30,7 @@ const logger = {
   error: addLog.bind(null, "error")
 };
 
-(async () => {
+setTimeout(async () => {
   let config = {};
   config.userAgent = ua.chrome(72);
   while (true) {
@@ -76,7 +76,7 @@ const logger = {
     }
     await browser.close();
   }
-})();
+}, 1e3);
 
 app.get("/", function(req, res) {
   res.send(

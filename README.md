@@ -14,11 +14,8 @@
 8. Чистить спам на сайтах
 9. Оплачивать домен сайта
 10. Оплачивать хостинг сайта
-11. Рассылать спам
-
-## Бот скоро научится
-
-1. Платить зарплату работникам
+11. Платить зарплату работникам
+12. Рассылать спам
 
 ## Бот не умеет
 
@@ -42,7 +39,7 @@
 
 0. Создайте аккаунт на [heroku](https://heroku.com/) и установите [Heroku cli tool installed](https://devcenter.heroku.com/articles/heroku-cli)
 1. создайте приложение `heroku create`
-2. задайте ваш логин и пароль от игры `heroku config:set login=*ваша_почта* password=*ваш_пароль*`
-3. укажите тип приложения `heroku buildpacks:set heroku/nodejs`
-4. добавляем плагин для heroku `heroku buildpacks:set jontewks/puppeteer`
-5. деплой кода `git push heroku master`
+1. задайте ваш логин и пароль от игры `heroku config:set login=*ваша_почта* password=*ваш_пароль*`
+1. укажите тип приложения `heroku buildpacks:set heroku/nodejs`
+1. добавляем плагин для heroku `heroku buildpacks:set jontewks/puppeteer`
+1. деплой кода `git push heroku master`

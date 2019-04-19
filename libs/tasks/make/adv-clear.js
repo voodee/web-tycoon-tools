@@ -68,20 +68,15 @@ module.exports = async (page, logger) => {
     const importunities1 = (await page.$$(".round-1")).length / 3;
     const importunities2 = (await page.$$(".round-2")).length / 3;
     const importunities3 = (await page.$$(".round-3")).length / 3;
-    logger.info(
-      "importunities",
-      importunities1,
-      importunities2,
-      importunities3
-    );
+
     const importunitiesSum =
       importunities1 * 12 + importunities2 * 41 + importunities3 * 100;
-    logger.info("importunitiesSum", importunitiesSum);
 
     logger.info("Конверсия", adConv);
-    logger.info("Минимальная конверсия", 270.0 / importunitiesSum);
-    if (adConv < 270.0 / importunitiesSum) {
-      // await remove(page, $card);
+    const minConv = Math.min(270.0 / importunitiesSum, 3.1);
+    logger.info("Минимальная конверсия", minConv);
+    if (adConv < minConv) {
+      await remove(page, $card);
       logger.info(`Удалена реклама с низкой конверсией ${adConv} с сайта`);
       continue;
     }
