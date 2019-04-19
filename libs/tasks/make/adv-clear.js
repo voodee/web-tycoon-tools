@@ -68,8 +68,15 @@ module.exports = async (page, logger) => {
     const importunities1 = (await page.$(".round-1")) / 3;
     const importunities2 = (await page.$(".round-2")) / 3;
     const importunities3 = (await page.$(".round-3")) / 3;
+    logger.info(
+      "importunities",
+      importunities1,
+      importunities2,
+      importunities3
+    );
     const importunitiesSum =
       importunities1 * 12 + importunities2 * 41 + importunities3 * 100;
+    logger.info("importunitiesSum", importunitiesSum);
 
     logger.info("Конверсия", adConv);
     logger.info("Минимальная конверсия", 270.0 / importunitiesSum);
