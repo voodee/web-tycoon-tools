@@ -77,9 +77,9 @@ module.exports = async (page, logger) => {
 
     logger.info("Конверсия", adConv);
     const confDown =
-      cardImportunities1 * 40 +
+      cardImportunities1 * 0 +
       cardImportunities2 * 10 +
-      cardImportunities3 * 0;
+      cardImportunities3 * 40;
     logger.info("Коэфициэент понижения", confDown);
     const minConv = Math.min(
       (220.0 - confDown) / Math.max(importunitiesSum, 124),
