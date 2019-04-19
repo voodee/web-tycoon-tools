@@ -73,7 +73,7 @@ module.exports = async (page, logger) => {
       importunities1 * 12 + importunities2 * 41 + importunities3 * 100;
 
     logger.info("Конверсия", adConv);
-    const minConv = Math.min(270.0 / importunitiesSum, 3.1);
+    const minConv = Math.min(270.0 / Math.max(importunitiesSum, 124), 3.1);
     logger.info("Минимальная конверсия", minConv);
     if (adConv < minConv) {
       await remove(page, $card);
