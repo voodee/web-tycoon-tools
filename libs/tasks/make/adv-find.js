@@ -2,9 +2,9 @@ const MAX_IMPORTUNITY = 120;
 
 module.exports = async (page, logger) => {
   // вычисляем сумму назойливости
-  const importunities1 = (await page.$(".round-1")) / 3;
-  const importunities2 = (await page.$(".round-2")) / 3;
-  const importunities3 = (await page.$(".round-3")) / 3;
+  const importunities1 = (await page.$$(".round-1")).length / 3;
+  const importunities2 = (await page.$$(".round-2")).length / 3;
+  const importunities3 = (await page.$$(".round-3")).length / 3;
 
   const importunitiesSum =
     importunities1 * 12 + importunities2 * 41 + importunities3 * 100;

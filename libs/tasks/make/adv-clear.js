@@ -65,9 +65,9 @@ module.exports = async (page, logger) => {
     const adConv = parseFloat(text.replace(",", "."));
 
     // вычисляем сумму назойливости
-    const importunities1 = (await page.$(".round-1")) / 3;
-    const importunities2 = (await page.$(".round-2")) / 3;
-    const importunities3 = (await page.$(".round-3")) / 3;
+    const importunities1 = (await page.$$(".round-1")).length / 3;
+    const importunities2 = (await page.$$(".round-2")).length / 3;
+    const importunities3 = (await page.$$(".round-3")).length / 3;
     logger.info(
       "importunities",
       importunities1,
@@ -81,7 +81,7 @@ module.exports = async (page, logger) => {
     logger.info("Конверсия", adConv);
     logger.info("Минимальная конверсия", 270.0 / importunitiesSum);
     if (adConv < 270.0 / importunitiesSum) {
-      await remove(page, $card);
+      // await remove(page, $card);
       logger.info(`Удалена реклама с низкой конверсией ${adConv} с сайта`);
       continue;
     }
