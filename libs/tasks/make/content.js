@@ -90,7 +90,11 @@ module.exports = async (page, logger) => {
       $content4publish = $goodContent[contentIndex2];
     }
 
-    await page.evaluate(el => el.click(), $content4publish);
+    logger.info("namesContent", namesContent);
+    logger.info("contentIndex1", contentIndex1);
+    logger.info("contentIndex2", contentIndex2);
+
+    // await page.evaluate(el => el.click(), $content4publish);
     logger.info("Опубликован контент");
   }
 };
