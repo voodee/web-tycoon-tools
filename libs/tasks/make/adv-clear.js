@@ -82,7 +82,7 @@ module.exports = async (page, logger) => {
       cardImportunities3 * 40;
     logger.info("Коэфициэент понижения", confDown);
     const minConv = Math.min(
-      (230.0 - confDown) / Math.max(importunitiesSum, 124),
+      (240.0 - confDown) / Math.max(importunitiesSum, 124),
       3.1
     );
     logger.info("Минимальная конверсия", minConv);
