@@ -23,7 +23,10 @@ module.exports = async (page, logger) => {
     await new Promise(res => setTimeout(res, 1000));
     $goodContent = await page.$$(".contentTypesWr .item .cardContainer");
     ++numberTry;
-  } while ($goodContent.length < 4 || numberTry > 10);
+  } while (
+    $goodContent.length > 4 ||
+    ($goodContent.length > 4 && numberTry < 10)
+  );
 
   const $taskMarketing = await page.$(".taskItem.marketing");
   const $cancelTaskMarketingButton = await $taskMarketing.$(".cancelTask");
