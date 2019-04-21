@@ -56,6 +56,7 @@ module.exports = async (page, logger) => {
       await $toggler.click();
       await new Promise(res => setTimeout(res, 1 * 1000));
       logger.info(`Включена реклама с сайта`);
+      continue;
     }
 
     // logger.info(`удаляем рекламу с низкой конверсией`);
