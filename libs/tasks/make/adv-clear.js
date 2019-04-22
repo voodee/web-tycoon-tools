@@ -92,6 +92,7 @@ module.exports = async (page, logger) => {
       logger.info(`Удалена реклама с низкой конверсией ${adConv} с сайта`);
       continue;
     }
+
     // await new Promise(res => setTimeout(res, 1 * 1000));
   }
 };
