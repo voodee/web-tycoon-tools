@@ -1,0 +1,15 @@
+version: "3.4"
+
+services:
+    bot:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: on-failure
+        command: node index
+        env_file:
+            - .env
+        volumes:
+            - ./:/app:cached
+        ports:
+            - "8091:8080"

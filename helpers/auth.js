@@ -42,6 +42,10 @@ module.exports = async (browser, { userAgent }) => {
   });
 
   // Login
+  await new Promise(res => setTimeout(res, 2e3));
+  await page.waitForSelector("#userEmail");
+  await page.waitForSelector("#userPassword");
+  await page.waitForSelector(".enterButton");
   await page.type("#userEmail", process.env.login);
   await page.type("#userPassword", process.env.password);
   await page.click(".enterButton");
