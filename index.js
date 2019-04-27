@@ -76,7 +76,7 @@ setTimeout(async () => {
     }
     await browser.close();
   }
-}, 1e3);
+}, 1e4);
 
 app.get("/", function(req, res) {
   res.send(
