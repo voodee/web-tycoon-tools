@@ -11,5 +11,5 @@ services:
             - .env
         volumes:
             - ./:/app:cached
-        ports:
-            - "8091:8080"
+        network_mode: "host"
+
