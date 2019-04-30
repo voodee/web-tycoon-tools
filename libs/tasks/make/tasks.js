@@ -1,5 +1,7 @@
 const findWorker = require("./helpers/findWorker");
 
+const sitesNoTask = (process.env.sites_no_task || "").split(",");
+
 module.exports = async (page, logger, config) => {
   /**
    * Таски
@@ -61,6 +63,15 @@ module.exports = async (page, logger, config) => {
       const hostingAllow = trafSpeed / hostingLimit < 0.9;
       if (!hostingAllow) {
         logger.info("Сайт достиг лимита хостинга");
+        continue;
+      }
+
+      const $siteName = await page.$(".subNavLeftGroup span:last-child");
+      const siteName = await (await $siteName.getProperty(
+        "textContent"
+      )).jsonValue();
+      if (sitesNoTask.includes(siteName)) {
+        logger.info(`Работа над сайтом ${siteName} запрещена настройками`);
         continue;
       }
 
