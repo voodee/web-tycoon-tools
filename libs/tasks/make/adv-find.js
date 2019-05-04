@@ -1,7 +1,19 @@
 const MAX_IMPORTUNITY = 120;
 const START_IMPORTUNITY = 40; // 55
 
+const sitesNoAds = (process.env.sites_no_ads || "").split(",");
+
 module.exports = async (page, logger) => {
+  // если сайт запрещён настройками, то ничего не делаем
+  const $siteName = await page.$(".subNavLeftGroup span:last-child");
+  const siteName = await (await $siteName.getProperty(
+    "textContent"
+  )).jsonValue();
+  if (sitesNoAds.includes(siteName)) {
+    logger.info(`Реклама на сайте ${siteName} запрещена настройками`);
+    return;
+  }
+
   // вычисляем сумму назойливости
   const importunities1 = (await page.$$(".round-1")).length / 3;
   const importunities2 = (await page.$$(".round-2")).length / 3;
