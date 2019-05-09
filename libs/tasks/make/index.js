@@ -123,16 +123,16 @@ module.exports = async (page, logger, config) => {
       }
 
       // Реклама
-      // try {
-      //   logger.info(`Поиск рекламы на сайте ${siteName}`);
-      //   await advFind(page, logger, { ...config, siteNumber });
-      // } catch (e) {
-      //   logger.error(
-      //     `Ошибка поиска рекламы на сайте`,
-      //     page.url(),
-      //     (e.response && e.response.data) || e
-      //   );
-      // }
+      try {
+        logger.info(`Поиск рекламы на сайте ${siteName}`);
+        await advFind(page, logger, { ...config, siteNumber });
+      } catch (e) {
+        logger.error(
+          `Ошибка поиска рекламы на сайте`,
+          page.url(),
+          (e.response && e.response.data) || e
+        );
+      }
 
       // Оплата домена и хостинга
       try {
