@@ -1,5 +1,5 @@
-const MAX_IMPORTUNITY = 120;
-const START_IMPORTUNITY = 40; // 55
+const MAX_IMPORTUNITY = 110;
+const START_IMPORTUNITY = 10; // 55
 
 const sitesNoAds = (process.env.sites_no_ads || "").split(",");
 
