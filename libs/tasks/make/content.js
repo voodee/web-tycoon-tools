@@ -58,6 +58,7 @@ module.exports = async (page, logger) => {
     // то публикуем
 
     await page.click(".panelWrapper .tabWrapper .tab:nth-child(1)");
+    await page.waitForSelector(".externalLinkWr .baseButton:first-child");
     await page.click(".externalLinkWr .baseButton:first-child");
 
     // читаем комментарии

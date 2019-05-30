@@ -1,5 +1,7 @@
 module.exports = async (page, logger) => {
-  await page.click(`.tabWrapper .tab:nth-child(1)`);
+  await page.waitForSelector(".tabWrapper .tab:nth-child(1)");
+  await new Promise(res => setTimeout(res, 1e3));
+  await page.click(".tabWrapper .tab:nth-child(1)");
 
   await page.waitForSelector(".externalLinkWr");
   const buttonsSpam = await page.$$(".button-spam");
