@@ -63,8 +63,10 @@ module.exports = async (page, $task, logger) => {
     }
   }
   // закрываем окно
-  await new Promise(res => setTimeout(res, 1e3));
-  await page.waitForSelector(".modalClose");
-  await page.click(".modalClose");
-  await new Promise(res => setTimeout(res, 1e3));
+  do {
+    await new Promise(res => setTimeout(res, 1e3));
+    await page.waitForSelector(".modalClose");
+    await page.click(".modalClose");
+    await new Promise(res => setTimeout(res, 1e3));
+  } while ((await page.$$(".modalClose")).length > 0);
 };

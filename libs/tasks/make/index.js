@@ -38,7 +38,12 @@ module.exports = async (page, logger, config) => {
     try {
       ++siteNumber;
       await new Promise(res => setTimeout(res, 500));
-      await page.waitForSelector(".prevNextNavGroup .leftArrow");
+      try {
+        await page.waitForSelector(".prevNextNavGroup .leftArrow");
+      } catch (e) {
+        await page.reload();
+        continue;
+      }
       await new Promise(res => setTimeout(res, 500));
       await (await page.$(".prevNextNavGroup .leftArrow")).click();
 
