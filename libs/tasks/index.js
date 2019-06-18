@@ -66,6 +66,11 @@ module.exports = async (browser, logger, config) => {
             await page.waitForSelector(".siteCard");
           })();
         }
+        // if (!url.includes("game.web-tycoon.com")) {
+        //   logger.error("Жопа(");
+        //   await goToLastSite(page, config);
+        //   return;
+        // }
       } catch (e) {}
     }
   })();
@@ -80,10 +85,41 @@ module.exports = async (browser, logger, config) => {
           await $dailyBonusButton.click();
         }
       } catch (e) {}
-      await new Promise(res => setTimeout(res, 10 * 1000));
+      await new Promise(res => setTimeout(res, 1e4));
     }
   })();
   // Ежедневная награда конец
+
+  // Потеря интернета начало
+  (async () => {
+    while (1) {
+      try {
+        const $noConnection = await page.$(".noConnection");
+        if ($noConnection) {
+          await page.reload();
+        }
+      } catch (e) {}
+      await new Promise(res => setTimeout(res, 1e4));
+    }
+  })();
+  // Потеря интернета конец
+
+  // любой пиздец начало
+  (async () => {
+    while (1) {
+      try {
+        const url = page.url();
+
+        if (!url.includes("game.web-tycoon.com")) {
+          logger.error("Пиздец(");
+          await goToLastSite(page, config);
+          return;
+        }
+      } catch (e) {}
+      await new Promise(res => setTimeout(res, 1e4));
+    }
+  })();
+  // любой пиздец конец
 
   let isPause = false;
   await page.setRequestInterception(true);
