@@ -107,16 +107,15 @@ module.exports = async (browser, logger, config) => {
   // любой пиздец начало
   (async () => {
     while (1) {
+      await new Promise(res => setTimeout(res, 1e4));
       try {
         const url = page.url();
 
         if (!url.includes("game.web-tycoon.com")) {
           logger.error("Пиздец(");
           await goToLastSite(page, config);
-          return;
         }
       } catch (e) {}
-      await new Promise(res => setTimeout(res, 1e4));
     }
   })();
   // любой пиздец конец
