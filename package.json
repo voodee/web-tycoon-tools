@@ -18,7 +18,7 @@
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
     "puppeteer": "^1.13.0",
-    "qs": "^6.6.0",
+    "qs": "^6.6.1",
     "useragent-generator": "^1.1.1-amkt-22079-finish.0"
   },
   "devDependencies": {
